@@ -1,0 +1,4 @@
+-r requirements.txt
+flexmock==0.9.6
+pysqlite==2.6.3
+pytest==2.2.3
