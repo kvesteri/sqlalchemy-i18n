@@ -7,12 +7,12 @@ from sqlalchemy_i18n import Translatable, translated_session
 
 class TestCase(object):
     def setup_method(self, method):
-        self.engine = create_engine('sqlite:///:memory:')
+        #self.engine = create_engine('sqlite:///:memory:')
+        self.engine = create_engine('postgres://postgres@localhost/test')
         #self.engine.echo = True
         self.Model = declarative_base()
 
         self.Article = self.create_models()
-        self.ArticleTranslation = self.Article.__translation_mapper__.class_
         self.Model.metadata.create_all(self.engine)
 
         Session = sessionmaker(bind=self.engine)
@@ -28,7 +28,7 @@ class TestCase(object):
             __tablename__ = 'article'
             __translated_columns__ = ['name', 'content']
 
-            id = sa.Column(sa.Integer, primary_key=True)
+            id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             name = sa.Column(sa.Unicode(255))
             content = sa.Column(sa.UnicodeText)
             description = sa.Column(sa.UnicodeText)
