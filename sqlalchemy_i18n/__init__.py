@@ -1,10 +1,33 @@
+import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import mapper, relationship  # , attributes, object_mapper
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm import mapper, relationship, object_session
+from sqlalchemy.orm.collections import (
+    MappedCollection, collection
+)
+from sqlalchemy.orm.util import has_identity
 # from sqlalchemy.orm.exc import UnmappedColumnError
 # from sqlalchemy.orm.interfaces import SessionExtension
 from sqlalchemy import Table, Column, ForeignKeyConstraint, Unicode
+
+
+class KeyMap(MappedCollection):
+    def __init__(self, *args, **kwargs):
+        MappedCollection.__init__(self, keyfunc=lambda node: node.language)
+
+    def __getitem__(self, key, _sa_initiator=None):
+        if key in self:
+            return self.get(key)
+        else:
+            return None
+
+    @collection.internally_instrumented
+    def __setitem__(self, key, value, _sa_initiator=None):
+        value.language = key
+        super(KeyMap, self).__setitem__(key, value, _sa_initiator)
+
+    @collection.internally_instrumented
+    def __delitem__(self, key, _sa_initiator=None):
+        super(KeyMap, self).__delitem__(key, _sa_initiator)
 
 
 def col_references_table(col, table):
@@ -14,14 +37,8 @@ def col_references_table(col, table):
     return False
 
 
-def _translation_mapper(local_mapper):
+def _translation_mapper(local_mapper, translated_columns):
     cls = local_mapper.class_
-
-    if not cls.__translated_columns__:
-        raise Exception(
-            'Transletable models must have __translated_columns__'
-            ' attribute defined.'
-        )
 
     super_mapper = local_mapper.inherits
     super_translation_mapper = getattr(cls, '__history_mapper__', None)
@@ -31,10 +48,9 @@ def _translation_mapper(local_mapper):
     if (not super_mapper or
             local_mapper.local_table is not super_mapper.local_table):
         cols = []
-        for column in local_mapper.local_table.c:
+        for column in (local_mapper.local_table.c + translated_columns):
             if column.name == 'language':
                 continue
-
             if (not column.primary_key
                     and column.name not in cls.__translated_columns__):
                 continue
@@ -64,7 +80,7 @@ def _translation_mapper(local_mapper):
         )
     else:
         # single table inheritance.  take any additional columns that may have
-        # been added and add them to the history table.
+        # been added and add them to the translation table.
         for column in local_mapper.local_table.c:
             if column.key not in super_translation_mapper.local_table.c:
                 col = column.copy()
@@ -76,12 +92,12 @@ def _translation_mapper(local_mapper):
         bases = (super_translation_mapper.class_,)
     else:
         bases = local_mapper.base_mapper.class_.__bases__
-    versioned_cls = type.__new__(
+    translated_cls = type.__new__(
         type, "%sTranslation" % cls.__name__, bases, {}
     )
 
     m = mapper(
-        versioned_cls,
+        translated_cls,
         table,
         inherits=super_translation_mapper,
         polymorphic_on=polymorphic_on,
@@ -90,33 +106,73 @@ def _translation_mapper(local_mapper):
     cls.__translation_mapper__ = m
 
     local_mapper.add_property(
-        '_translations',
+        'translations',
         relationship(
-            versioned_cls,
-            primaryjoin=getattr(cls, 'id') == getattr(versioned_cls, 'id'),
-            collection_class=attribute_mapped_collection('language'),
+            translated_cls,
+            primaryjoin=getattr(cls, 'id') == getattr(translated_cls, 'id'),
+            backref='parent',
+            collection_class=KeyMap,
         )
     )
 
-    def creator(lang, obj):
-        obj.language = lang
-        return obj
+    for column_name in cls.__translated_columns__:
+        def proxy(name):
+            def locale_obj(self):
+                session = object_session(self)
+                locale = get_locale()
+                if not session or not has_identity(self):
+                    if locale in self.translations:
+                        return self.translations[locale]
+                    obj = translated_cls(parent=self, language=locale)
+                else:
+                    try:
+                        obj = session.query(translated_cls).filter(
+                            sa.and_(
+                                translated_cls.id == self.id,
+                                translated_cls.language == locale
+                            )
+                        ).one()
+                    except sa.orm.exc.NoResultFound:
+                        obj = translated_cls(
+                            parent=self, language=locale
+                        )
+                self.translations[locale] = obj
+                return obj
 
-    cls.translations = association_proxy(
-        '_translations',
-        'language',
-        creator=creator
-    )
+            @property
+            def proxy_property(self):
+                return getattr(locale_obj(self), name)
+
+            @proxy_property.setter
+            def proxy_property(self, value):
+                setattr(locale_obj(self), name, value)
+            return proxy_property
+        setattr(cls, column_name, proxy(column_name))
+
+
+def get_locale():
+    return u'en'
 
 
 class Translatable(object):
     @declared_attr
     def __mapper_cls__(cls):
-        def map(cls, *arg, **kw):
-            mp = mapper(cls, *arg, **kw)
-            _translation_mapper(mp)
+        def _map(cls, *args, **kwargs):
+            if not cls.__translated_columns__:
+                raise Exception(
+                    'Translateable models must have __translated_columns__'
+                    ' attribute defined.'
+                )
+            translated_columns = []
+            for table in args:
+                if isinstance(table, sa.Table):
+                    for column in table.c:
+                        if column.name in cls.__translated_columns__:
+                            translated_columns.append(column)
+            mp = mapper(cls, *args, **kwargs)
+            _translation_mapper(mp, translated_columns)
             return mp
-        return map
+        return _map
 
 
 def translated_session(session, locale='en'):
