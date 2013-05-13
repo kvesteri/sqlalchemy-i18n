@@ -1,14 +1,9 @@
 Changelog
 ---------
 
-Here you can see the full list of changes between each WTForms-Alchemy release.
+Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
-0.1.1 (2012-03-12)
+0.1.0 (2013-05-13)
 ^^^^^^^^^^^^^^^^^^
 
-- Added smart one-to-one and one-to-many relationship population
-
-0.1.0 (2012-03-11)
-^^^^^^^^^^^^^^^^^^
-
-- Initial public release
+- Initial release

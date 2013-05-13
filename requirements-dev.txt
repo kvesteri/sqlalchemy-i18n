@@ -2,4 +2,5 @@
 flexmock==0.9.6
 pysqlite==2.6.3
 pytest==2.2.3
+psycopg2>=2.5
 -e git+https://github.com/kvesteri/sqlalchemy-test.git@a3b5daf9ce4daf7238f497afd72e8aebb2d034e6#egg=sqlalchemy-test-dev
