@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.hybrid import hybrid_property, Comparator
 
 
 class ProxyDict(object):
@@ -54,13 +54,23 @@ class ProxyDict(object):
         self.cache[key] = value
 
 
+def remove_property(class_, name):
+    mapper = class_.mapper
+    table = class_.__table__
+    columns = class_.mapper.c
+    column = columns[name]
+    del columns._data[name]
+    del mapper.columns[name]
+    columns._all_cols.remove(column)
+    mapper._cols_by_table[table].remove(column)
+    mapper.class_manager.uninstrument_attribute(name)
+    del mapper._props[name]
+
+
 def primary_keys(model):
     for column in model.__table__.c:
         if column.primary_key:
             yield column
-
-
-import inspect
 
 
 class Translatable(object):
@@ -69,31 +79,33 @@ class Translatable(object):
     @hybrid_property
     def current_translation(self):
         locale = self.__translatable__['locale_getter']()
-        if not inspect.isclass(self):
-            if locale in self.translations:
-                return self.translations[locale]
+        if locale in self.translations:
+            return self.translations[locale]
 
-            class_ = self.__class__.__translated_columns__['class']
-            obj = class_()
-            obj.locale = locale
-            self.translations[locale] = obj
-            return obj
-        else:
-            try:
-                return self._current_translation
-            except AttributeError:
-                translation_cls = self.__translatable__['class']
-                self._current_translation = sa.orm.relationship(
-                    translation_cls,
-                    primaryjoin=sa.and_(
-                        self.id == translation_cls.id,
-                        translation_cls.locale == locale
-                    ),
-                    uselist=False,
-                    cascade='all, delete-orphan',
-                    passive_deletes=True,
-                )
-                return self._current_translation
+        class_ = self.__translatable__['class']
+        obj = class_()
+        obj.locale = locale
+        self.translations[locale] = obj
+        return obj
+
+    @current_translation.expression
+    def current_translation(cls):
+        try:
+            return cls._current_translation
+        except AttributeError:
+            locale = cls.__translatable__['locale_getter']()
+            translation_cls = cls.__translatable__['class']
+            cls._current_translation = sa.orm.relationship(
+                translation_cls,
+                primaryjoin=sa.and_(
+                    cls.id == translation_cls.id,
+                    translation_cls.locale == locale
+                ),
+                uselist=False,
+                cascade='all, delete-orphan',
+                passive_deletes=True,
+            )
+            return cls._current_translation
 
     @property
     def translations(self):
@@ -126,16 +138,19 @@ def translation_setter_factory(name):
     )
 
 
-from sqlalchemy.ext.hybrid import Comparator
+class TranslationTransformer(Comparator):
+    def __init__(self, cls):
+        self.alias = sa.orm.aliased(cls.__translatable__['class'])
+        self.parent = cls
 
+    @property
+    def join(self):
+        def go(q):
+            return q.outerjoin(self.alias, self.parent.current_translation)
+        return go
 
-class TranslationComparator(Comparator):
     def operate(self, op, other):
-        print op, other
-
-        def transform(q):
-            return q
-        return transform
+        return op(self.alias.name, other)
 
 
 class TranslationModelGenerator(object):
@@ -176,15 +191,6 @@ class TranslationModelGenerator(object):
             ondelete='CASCADE'
         )
 
-    def build_translated_columns(self):
-        columns = []
-        for name in self.model.__translated_columns__:
-            column = getattr(self.model.__table__.c, name)
-            column.table = None
-            columns.append(column)
-            self.model.__mapper__.class_manager.uninstrument_attribute(name)
-        return columns
-
     def build_locale_column(self):
         return sa.Column(
             self.option('locale_column_name'),
@@ -194,7 +200,7 @@ class TranslationModelGenerator(object):
 
     def build_columns(self):
         columns = self.build_reflected_primary_keys()
-        columns.extend(self.build_translated_columns())
+        columns.extend(self.model.__translated_columns__)
         columns.append(self.build_locale_column())
         return columns
 
@@ -211,17 +217,16 @@ class TranslationModelGenerator(object):
         setattr(
             self.model,
             attr,
-            property(translation_getter_factory(attr))
-        )
-        setattr(
-            self.model,
-            attr,
-            getattr(self.model, attr).setter(translation_setter_factory(attr))
+            hybrid_property(
+                fget=translation_getter_factory(attr),
+                fset=translation_setter_factory(attr),
+                expr=lambda cls: getattr(self.translation_class, attr)
+            )
         )
 
     def build_getters_and_setters(self):
-        for name in self.model.__translated_columns__:
-            self.assign_attr_getter_setters(name)
+        for column in self.model.__translated_columns__:
+            self.assign_attr_getter_setters(column.name)
 
     def build_relationship(self):
         self.model._translations = sa.orm.relationship(
@@ -243,6 +248,6 @@ class TranslationModelGenerator(object):
         self.translation_class = Translation
         self.build_relationship()
         self.model.__translatable__['declared'] = True
-        self.build_getters_and_setters()
         self.model.__translatable__['class'] = Translation
         Translation.__parent_class__ = self.model
+        self.build_getters_and_setters()

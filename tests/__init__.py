@@ -14,7 +14,6 @@ class TestCase(object):
 
         self.Article = self.create_models()
         sa.orm.configure_mappers()
-
         self.Model.metadata.create_all(self.engine)
 
         Session = sessionmaker(bind=self.engine)
@@ -28,18 +27,15 @@ class TestCase(object):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = ['name', 'content']
+            __translated_columns__ = [
+                sa.Column('name', sa.Unicode(255)),
+                sa.Column('content', sa.UnicodeText)
+            ]
             __translatable__ = {
                 'locale_getter': lambda: 'en'
             }
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-            name = sa.Column(sa.Unicode(255))
-            content = sa.Column(sa.UnicodeText)
             description = sa.Column(sa.UnicodeText)
-
-            @sa.ext.hybrid.hybrid_property
-            def _name(self):
-                return self.current_translation.name
 
         return Article

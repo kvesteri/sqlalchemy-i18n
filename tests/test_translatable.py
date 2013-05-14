@@ -24,6 +24,25 @@ class TestTranslatableModel(TestCase):
         assert 'content' in columns
         assert 'description' not in columns
 
+    def test_removes_columns_from_parent_table(self):
+        article = self.Article()
+        columns = article.__table__.c
+        assert 'name' not in columns
+        assert 'content' not in columns
+        assert 'description' in columns
+
+    def test_removes_columns_from_parent_table_mapper(self):
+        mapper = self.Article.__mapper__
+        table = self.Article.__table__
+        columns = mapper.columns
+        assert 'name' not in columns
+        assert 'content' not in columns
+        assert 'description' in columns
+        names = [c.name for c in mapper._cols_by_table[table]]
+        assert 'name' not in names
+        assert 'content' not in names
+        assert 'description' in names
+
     def test_property_delegators(self):
         article = self.Article()
         article._translations.count()
@@ -40,7 +59,7 @@ class TestTranslatableModel(TestCase):
         table = self.Model.metadata.tables['article_translation']
         assert 'locale' in table.c
 
-    def test_hybrid_properties(self):
+    def test_current_translation_as_class_level_property(self):
         query = (
             self.session.query(self.Article)
             .join(self.Article.current_translation)
@@ -49,6 +68,25 @@ class TestTranslatableModel(TestCase):
             'JOIN article_translation ON article.id = article_translation.id'
             ' AND article_translation.locale = :locale'
             in str(query)
+        )
+
+    def test_translation_query_tranformers(self):
+        query = (
+            self.session.query(self.Article)
+        )
+        assert str(query) == (
+            'SELECT article.id AS article_id, article.description AS'
+            ' article_description \nFROM article'
+        )
+        query = (
+            self.session.query(self.Article.__translatable__['class'])
+        )
+        assert str(query) == (
+            'SELECT article_translation.id AS article_translation_id, '
+            'article_translation.name AS article_translation_name, '
+            'article_translation.content AS article_translation_content, '
+            'article_translation.locale AS article_translation_locale '
+            '\nFROM article_translation'
         )
 
 
