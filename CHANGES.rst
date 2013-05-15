@@ -3,6 +3,13 @@ Changelog
 
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
+
+0.1.2 (2013-05-15)
+^^^^^^^^^^^^^^^^^^
+
+- Added base_classes configuration option
+
+
 0.1.1 (2013-05-15)
 ^^^^^^^^^^^^^^^^^^
 

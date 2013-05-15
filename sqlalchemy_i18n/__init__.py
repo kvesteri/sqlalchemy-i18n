@@ -156,7 +156,8 @@ class TranslationTransformer(Comparator):
 class TranslationModelGenerator(object):
     DEFAULT_OPTIONS = {
         'table_name': '%s_translation',
-        'locale_column_name': 'locale'
+        'locale_column_name': 'locale',
+        'base_classes': None
     }
 
     def __init__(self, model):
@@ -164,7 +165,7 @@ class TranslationModelGenerator(object):
 
     def option(self, name):
         try:
-            self.model.__translatable__[name]
+            return self.model.__translatable__[name]
         except (AttributeError, KeyError):
             return self.DEFAULT_OPTIONS[name]
 
@@ -238,9 +239,11 @@ class TranslationModelGenerator(object):
         )
 
     def build_model(self):
+        if not self.option('base_classes'):
+            raise Exception('Missing __translatable__ base_classes option.')
         return type(
             '%sTranslation' % self.model.__name__,
-            (self.model.__bases__[0],),
+            self.option('base_classes'),
             {'__table__': self.build_table()}
         )
 

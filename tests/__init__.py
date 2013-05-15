@@ -32,7 +32,8 @@ class TestCase(object):
                 sa.Column('content', sa.UnicodeText)
             ]
             __translatable__ = {
-                'locale_getter': lambda: 'en'
+                'locale_getter': lambda: 'en',
+                'base_classes': (self.Model, )
             }
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
