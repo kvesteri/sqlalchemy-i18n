@@ -238,9 +238,11 @@ class TranslationModelGenerator(object):
         )
 
     def build_model(self):
-        class Translation(self.model.__bases__[0]):
-            __table__ = self.build_table()
-        return Translation
+        return type(
+            '%sTranslation' % self.model.__name__,
+            (self.model.__bases__[0],),
+            {'__table__': self.build_table()}
+        )
 
     def __call__(self):
         Translation = self.build_model()

@@ -12,7 +12,7 @@ class TestCase(object):
         )
         self.Model = declarative_base()
 
-        self.Article = self.create_models()
+        self.create_models()
         sa.orm.configure_mappers()
         self.Model.metadata.create_all(self.engine)
 
@@ -38,4 +38,4 @@ class TestCase(object):
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
 
-        return Article
+        self.Article = Article

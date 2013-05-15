@@ -23,20 +23,20 @@ class PyTest(Command):
         raise SystemExit(errno)
 
 setup(
-    name='sqlalchemy-i18n',
-    version='0.1.0',
+    name='SQLAlchemy-i18n',
+    version='0.1.1',
     url='https://github.com/kvesteri/sqlalchemy-i18n',
     license='BSD',
     author='Konsta Vesterinen',
     author_email='konsta@fastmonkeys.com',
     description='Internationalization extension for SQLAlchemy models.',
     long_description=__doc__,
-    packages=['wtforms_alchemy'],
+    packages=['sqlalchemy_i18n'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'SQLAlchemy>=0.7',
+        'SQLAlchemy>=0.8',
     ],
     cmdclass={'test': PyTest},
     classifiers=[

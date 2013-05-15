@@ -4,7 +4,7 @@ from tests import TestCase
 
 
 class TestTranslatableModel(TestCase):
-    def test_auto_creates_relation(self):
+    def test_auto_creates_relations(self):
         article = self.Article()
         assert article.translations
         assert article._translations
@@ -16,6 +16,9 @@ class TestTranslatableModel(TestCase):
     def test_translatable_attributes(self):
         article = self.Article()
         assert article.__translatable__['class']
+        assert article.__translatable__['class'].__name__ == (
+            'ArticleTranslation'
+        )
 
     def test_translated_columns(self):
         article = self.Article()
