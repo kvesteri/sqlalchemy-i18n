@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.1.5 (2013-05-16)
+^^^^^^^^^^^^^^^^^^
+
+- Column locale defined right after primary keys
+
+
 0.1.4 (2013-05-16)
 ^^^^^^^^^^^^^^^^^^
 

@@ -65,8 +65,8 @@ class TestTranslatableModel(TestCase):
         )
         assert str(query) == (
             'SELECT article_translation.id AS article_translation_id, '
+            'article_translation.locale AS article_translation_locale, '
             'article_translation.name AS article_translation_name, '
-            'article_translation.content AS article_translation_content, '
-            'article_translation.locale AS article_translation_locale '
+            'article_translation.content AS article_translation_content '
             '\nFROM article_translation'
         )

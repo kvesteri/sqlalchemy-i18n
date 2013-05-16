@@ -217,8 +217,8 @@ class TranslationModelGenerator(object):
 
     def build_columns(self):
         columns = self.build_reflected_primary_keys()
-        columns.extend(self.model.__translated_columns__)
         columns.append(self.build_locale_column())
+        columns.extend(self.model.__translated_columns__)
         return columns
 
     def build_table(self):
