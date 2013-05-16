@@ -1,3 +1,4 @@
+import inspect
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
 
@@ -122,9 +123,8 @@ class Translatable(object):
 
     @classmethod
     def __declare_last__(cls):
-        if not cls.__translatable__.get('declared'):
-            generator = TranslationModelGenerator(cls)
-            generator()
+        generator = TranslationModelGenerator(cls)
+        generator()
 
 
 def translation_getter_factory(name):
@@ -162,6 +162,21 @@ class TranslationModelGenerator(object):
 
     def __init__(self, model):
         self.model = model
+        parents = inspect.getmro(self.model)
+        self.translation_class = None
+        for parent in parents:
+            try:
+                self.translation_class = parent.__translatable__['class']
+            except AttributeError:
+                pass
+            except KeyError:
+                pass
+
+    @property
+    def table_name(self):
+        if self.translation_class:
+            return self.translation_class.__table__.name
+        return self.option('table_name') % self.model.__tablename__
 
     def option(self, name):
         try:
@@ -206,12 +221,22 @@ class TranslationModelGenerator(object):
         return columns
 
     def build_table(self):
+        table_exists = self.table_name in self.model.metadata.tables
         items = self.build_columns()
-        items.append(self.build_foreign_key())
+        if table_exists:
+            table = self.model.metadata.tables[self.table_name]
+            for column in table.c:
+                for c in items:
+                    if c.name == column.name:
+                        items.remove(c)
+        else:
+            items.append(self.build_foreign_key())
+
         return sa.schema.Table(
-            self.option('table_name') % self.model.__tablename__,
+            self.table_name,
             self.model.__bases__[0].metadata,
-            *items
+            *items,
+            extend_existing=table_exists
         )
 
     def assign_attr_getter_setters(self, attr):
@@ -240,7 +265,10 @@ class TranslationModelGenerator(object):
 
     def build_model(self):
         if not self.option('base_classes'):
-            raise Exception('Missing __translatable__ base_classes option.')
+            raise Exception(
+                'Missing __translatable__ base_classes option for model %s.'
+                % self.model.__name__
+            )
         return type(
             '%sTranslation' % self.model.__name__,
             self.option('base_classes'),
@@ -248,11 +276,11 @@ class TranslationModelGenerator(object):
         )
 
     def __call__(self):
-        Translation = self.build_model()
-
-        self.translation_class = Translation
-        self.build_relationship()
-        self.model.__translatable__['declared'] = True
-        self.model.__translatable__['class'] = Translation
-        Translation.__parent_class__ = self.model
+        if not self.translation_class:
+            self.translation_class = self.build_model()
+            self.build_relationship()
+        else:
+            self.translation_class.__table__ = self.build_table()
+        self.model.__translatable__['class'] = self.translation_class
+        self.translation_class.__parent_class__ = self.model
         self.build_getters_and_setters()

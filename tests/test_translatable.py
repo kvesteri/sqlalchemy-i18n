@@ -1,5 +1,3 @@
-from flexmock import flexmock
-from sqlalchemy_i18n import ProxyDict
 from tests import TestCase
 
 
@@ -26,25 +24,6 @@ class TestTranslatableModel(TestCase):
         assert 'name' in columns
         assert 'content' in columns
         assert 'description' not in columns
-
-    def test_removes_columns_from_parent_table(self):
-        article = self.Article()
-        columns = article.__table__.c
-        assert 'name' not in columns
-        assert 'content' not in columns
-        assert 'description' in columns
-
-    def test_removes_columns_from_parent_table_mapper(self):
-        mapper = self.Article.__mapper__
-        table = self.Article.__table__
-        columns = mapper.columns
-        assert 'name' not in columns
-        assert 'content' not in columns
-        assert 'description' in columns
-        names = [c.name for c in mapper._cols_by_table[table]]
-        assert 'name' not in names
-        assert 'content' not in names
-        assert 'description' in names
 
     def test_property_delegators(self):
         article = self.Article()
@@ -91,42 +70,3 @@ class TestTranslatableModel(TestCase):
             'article_translation.locale AS article_translation_locale '
             '\nFROM article_translation'
         )
-
-
-class TestProxyDict(TestCase):
-    def test_access_key_for_pending_parent(self):
-        article = self.Article()
-        self.session.add(article)
-        assert article.translations['en']
-
-    def test_access_key_for_transient_parent(self):
-        article = self.Article()
-        assert article.translations['en']
-
-    def test_cache(self):
-        article = self.Article()
-        (
-            flexmock(ProxyDict)
-            .should_receive('fetch')
-            .once()
-        )
-        self.session.add(article)
-        self.session.commit()
-        article.translations['en']
-        article.translations['en']
-
-    def test_set_updates_cache(self):
-        article = self.Article()
-        (
-            flexmock(ProxyDict)
-            .should_receive('fetch')
-            .once()
-        )
-        self.session.add(article)
-        self.session.commit()
-        article.translations['en']
-        article.translations['en'] = self.Article.__translatable__['class'](
-            locale='en',
-            name=u'something'
-        )
-        article.translations['en']
