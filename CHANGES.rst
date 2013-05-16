@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.1.4 (2013-05-16)
+^^^^^^^^^^^^^^^^^^
+
+- Fixed translatable options handling when using common base class
+
+
 0.1.3 (2013-05-16)
 ^^^^^^^^^^^^^^^^^^
 

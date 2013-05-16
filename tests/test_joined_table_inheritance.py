@@ -56,9 +56,11 @@ class TestJoinedTableInheritance(TestCase):
 
     def test_translatable_attributes(self):
         textitem = self.TextItem()
-        assert textitem.__translatable__['class']
+        class_ = textitem.__translatable__['class']
+        assert class_.__name__ == 'TextItemTranslation'
         article = self.Article()
-        assert article.__translatable__['class']
+        class_ = article.__translatable__['class']
+        assert class_.__name__ == 'TextItemTranslation'
 
     def test_translated_columns(self):
         article = self.Article()

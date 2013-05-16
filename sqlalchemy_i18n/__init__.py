@@ -1,3 +1,4 @@
+from copy import copy
 import inspect
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
@@ -276,6 +277,10 @@ class TranslationModelGenerator(object):
         )
 
     def __call__(self):
+        # translatable attributes need to be copied for each child class,
+        # otherwise each child class would share the same __translatable__
+        # option dict
+        self.model.__translatable__ = copy(self.model.__translatable__)
         if not self.translation_class:
             self.translation_class = self.build_model()
             self.build_relationship()
