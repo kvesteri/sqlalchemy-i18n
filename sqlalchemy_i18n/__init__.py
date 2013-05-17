@@ -1,59 +1,7 @@
 from copy import copy
-import inspect
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
-
-
-class ProxyDict(object):
-    def __init__(self, parent, collection_name, child_class, key_name):
-        self.parent = parent
-        self.collection_name = collection_name
-        self.child_class = child_class
-        self.key_name = key_name
-        self.cache = {}
-
-    @property
-    def collection(self):
-        return getattr(self.parent, self.collection_name)
-
-    def keys(self):
-        descriptor = getattr(self.child_class, self.key_name)
-        return [x[0] for x in self.collection.values(descriptor)]
-
-    def __contains__(self, key):
-        try:
-            return key in self.cache or self[key]
-        except KeyError:
-            return False
-
-    def fetch(self, key):
-        return self.collection.filter_by(**{self.key_name: key}).first()
-
-    def __getitem__(self, key):
-        if key in self.cache:
-            return self.cache[key]
-
-        session = sa.orm.object_session(self.parent)
-        if not session or not sa.orm.util.has_identity(self.parent):
-            value = self.child_class(**{self.key_name: key})
-            self.collection.append(value)
-        else:
-            value = self.fetch(key)
-            if not value:
-                value = self.child_class(**{self.key_name: key})
-                self.collection.append(value)
-
-        self.cache[key] = value
-        return value
-
-    def __setitem__(self, key, value):
-        try:
-            existing = self[key]
-            self.collection.remove(existing)
-        except KeyError:
-            pass
-        self.collection.append(value)
-        self.cache[key] = value
+from sqlalchemy_utils import ProxyDict
 
 
 def remove_property(class_, name):
@@ -77,6 +25,7 @@ def primary_keys(model):
 
 class Translatable(object):
     __translatable__ = {}
+    __pending__ = []
 
     @hybrid_property
     def current_translation(self):
@@ -124,8 +73,8 @@ class Translatable(object):
 
     @classmethod
     def __declare_last__(cls):
-        generator = TranslationModelGenerator(cls)
-        generator()
+        if not cls.__translatable__.get('class'):
+            cls.__pending__.append(cls)
 
 
 def translation_getter_factory(name):
@@ -154,36 +103,57 @@ class TranslationTransformer(Comparator):
         return op(self.alias.name, other)
 
 
-class TranslationModelGenerator(object):
+def configure_translatables():
+    tables = {}
+
+    for cls in Translatable.__pending__:
+        existing_table = None
+        for class_ in tables:
+            if issubclass(cls, class_):
+                existing_table = tables[class_]
+                break
+
+        builder = TranslationTableBuilder(cls)
+        if existing_table is not None:
+            tables[class_] = builder.build_table(existing_table)
+        else:
+            table = builder.build_table()
+            tables[cls] = table
+
+    for cls in Translatable.__pending__:
+        if cls in tables:
+            builder = TranslationModelBuilder(cls)
+            builder(tables[cls])
+        builder = HybridPropertyBuilder(cls)
+        builder()
+
+    Translatable.__pending__ = []
+
+
+class TranslationBuilder(object):
     DEFAULT_OPTIONS = {
+        'base_classes': None,
         'table_name': '%s_translation',
         'locale_column_name': 'locale',
-        'base_classes': None
     }
 
     def __init__(self, model):
         self.model = model
-        parents = inspect.getmro(self.model)
-        self.translation_class = None
-        for parent in parents:
-            try:
-                self.translation_class = parent.__translatable__['class']
-            except AttributeError:
-                pass
-            except KeyError:
-                pass
-
-    @property
-    def table_name(self):
-        if self.translation_class:
-            return self.translation_class.__table__.name
-        return self.option('table_name') % self.model.__tablename__
 
     def option(self, name):
         try:
             return self.model.__translatable__[name]
         except (AttributeError, KeyError):
             return self.DEFAULT_OPTIONS[name]
+
+
+class TranslationTableBuilder(TranslationBuilder):
+    def __init__(self, model):
+        self.model = model
+
+    @property
+    def table_name(self):
+        return self.option('table_name') % self.model.__tablename__
 
     def build_reflected_primary_keys(self):
         columns = []
@@ -215,31 +185,26 @@ class TranslationModelGenerator(object):
             primary_key=True
         )
 
-    def build_columns(self):
-        columns = self.build_reflected_primary_keys()
-        columns.append(self.build_locale_column())
-        columns.extend(self.model.__translated_columns__)
-        return columns
+    def build_table(self, extends=None):
+        items = []
+        if extends is None:
+            items.extend(self.build_reflected_primary_keys())
+            items.append(self.build_locale_column())
 
-    def build_table(self):
-        table_exists = self.table_name in self.model.metadata.tables
-        items = self.build_columns()
-        if table_exists:
-            table = self.model.metadata.tables[self.table_name]
-            for column in table.c:
-                for c in items:
-                    if c.name == column.name:
-                        items.remove(c)
-        else:
+        items.extend(self.model.__translated_columns__)
+
+        if extends is None:
             items.append(self.build_foreign_key())
 
         return sa.schema.Table(
-            self.table_name,
+            extends.name if extends is not None else self.table_name,
             self.model.__bases__[0].metadata,
             *items,
-            extend_existing=table_exists
+            extend_existing=extends is not None
         )
 
+
+class HybridPropertyBuilder(TranslationBuilder):
     def assign_attr_getter_setters(self, attr):
         setattr(
             self.model,
@@ -247,14 +212,16 @@ class TranslationModelGenerator(object):
             hybrid_property(
                 fget=translation_getter_factory(attr),
                 fset=translation_setter_factory(attr),
-                expr=lambda cls: getattr(self.translation_class, attr)
+                expr=lambda cls: getattr(cls.__translatable__['class'], attr)
             )
         )
 
-    def build_getters_and_setters(self):
+    def __call__(self):
         for column in self.model.__translated_columns__:
             self.assign_attr_getter_setters(column.name)
 
+
+class TranslationModelBuilder(TranslationBuilder):
     def build_relationship(self):
         self.model._translations = sa.orm.relationship(
             self.translation_class,
@@ -264,7 +231,7 @@ class TranslationModelGenerator(object):
             backref=sa.orm.backref('parent'),
         )
 
-    def build_model(self):
+    def build_model(self, table):
         if not self.option('base_classes'):
             raise Exception(
                 'Missing __translatable__ base_classes option for model %s.'
@@ -273,19 +240,15 @@ class TranslationModelGenerator(object):
         return type(
             '%sTranslation' % self.model.__name__,
             self.option('base_classes'),
-            {'__table__': self.build_table()}
+            {'__table__': table}
         )
 
-    def __call__(self):
+    def __call__(self, table):
         # translatable attributes need to be copied for each child class,
         # otherwise each child class would share the same __translatable__
         # option dict
         self.model.__translatable__ = copy(self.model.__translatable__)
-        if not self.translation_class:
-            self.translation_class = self.build_model()
-            self.build_relationship()
-        else:
-            self.translation_class.__table__ = self.build_table()
+        self.translation_class = self.build_model(table)
+        self.build_relationship()
         self.model.__translatable__['class'] = self.translation_class
         self.translation_class.__parent_class__ = self.model
-        self.build_getters_and_setters()

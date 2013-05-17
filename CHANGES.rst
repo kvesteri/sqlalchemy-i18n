@@ -4,6 +4,14 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.2.0 (2013-05-17)
+^^^^^^^^^^^^^^^^^^
+
+- ProxyDict moved to SQLAlchemy-Utils
+- SQLAlchemy-Utils added as dependency
+- Completely rewritten inheritance handling
+
+
 0.1.5 (2013-05-16)
 ^^^^^^^^^^^^^^^^^^
 

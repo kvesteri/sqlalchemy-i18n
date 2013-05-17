@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_i18n import Translatable
+from sqlalchemy_i18n import Translatable, configure_translatables
 
 
 class TestCase(object):
@@ -13,6 +13,11 @@ class TestCase(object):
         self.Model = declarative_base()
 
         self.create_models()
+
+        sa.event.listen(
+            sa.orm.mapper, 'after_configured', configure_translatables
+        )
+
         sa.orm.configure_mappers()
         self.Model.metadata.create_all(self.engine)
 

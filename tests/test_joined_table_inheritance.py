@@ -62,6 +62,9 @@ class TestJoinedTableInheritance(TestCase):
         class_ = article.__translatable__['class']
         assert class_.__name__ == 'TextItemTranslation'
 
+    def test_inherits_child_properties(self):
+        assert self.Article.caption
+
     def test_translated_columns(self):
         article = self.Article()
         columns = article.__translatable__['class'].__table__.c
