@@ -52,7 +52,7 @@ class TestTranslatableModel(TestCase):
             in str(query)
         )
 
-    def test_translation_query_tranformers(self):
+    def test_querying(self):
         query = (
             self.session.query(self.Article)
         )

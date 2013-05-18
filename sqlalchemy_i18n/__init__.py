@@ -2,25 +2,7 @@ from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
 from sqlalchemy_utils import ProxyDict
-
-
-def remove_property(class_, name):
-    mapper = class_.mapper
-    table = class_.__table__
-    columns = class_.mapper.c
-    column = columns[name]
-    del columns._data[name]
-    del mapper.columns[name]
-    columns._all_cols.remove(column)
-    mapper._cols_by_table[table].remove(column)
-    mapper.class_manager.uninstrument_attribute(name)
-    del mapper._props[name]
-
-
-def primary_keys(model):
-    for column in model.__table__.c:
-        if column.primary_key:
-            yield column
+from sqlalchemy_utils.functions import primary_keys
 
 
 class Translatable(object):
