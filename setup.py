@@ -24,7 +24,7 @@ class PyTest(Command):
 
 setup(
     name='SQLAlchemy-i18n',
-    version='0.1.5',
+    version='0.2.0',
     url='https://github.com/kvesteri/sqlalchemy-i18n',
     license='BSD',
     author='Konsta Vesterinen',
@@ -37,7 +37,7 @@ setup(
     platforms='any',
     install_requires=[
         'SQLAlchemy>=0.8',
-        'SQLAlchemy-Utils>=0.12'
+        'SQLAlchemy-Utils>=0.12.1'
     ],
     cmdclass={'test': PyTest},
     classifiers=[
