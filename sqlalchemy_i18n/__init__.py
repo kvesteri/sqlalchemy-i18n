@@ -11,36 +11,52 @@ class Translatable(object):
 
     @hybrid_property
     def current_translation(self):
-        locale = self.__translatable__['locale_getter']()
+        locale = str(self.__translatable__['locale_getter']())
         if locale in self.translations:
+            try:
+                self._current_translation = self.translations[locale]
+            except AttributeError:
+                self.__class__.load_lazy_relationships()
+                self._current_translation = self.translations[locale]
+
             return self.translations[locale]
 
         class_ = self.__translatable__['class']
         obj = class_()
         obj.locale = locale
         self.translations[locale] = obj
+        self._current_translation = obj
         return obj
+
+    @current_translation.setter
+    def current_translation(self, obj):
+        locale = str(self.__translatable__['locale_getter']())
+        obj.locale = locale
+        self.translations[locale] = obj
 
     @current_translation.expression
     def current_translation(cls):
         try:
             return cls._current_translation
         except AttributeError:
-            locale = cls.__translatable__['locale_getter']()
-            translation_cls = cls.__translatable__['class']
-            cls._current_translation = sa.orm.relationship(
-                translation_cls,
-                primaryjoin=sa.and_(
-                    cls.id == translation_cls.id,
-                    translation_cls.locale == locale
-                ),
-                uselist=False,
-                cascade='all, delete-orphan',
-                passive_deletes=True,
-            )
+            cls.load_lazy_relationships()
             return cls._current_translation
 
-    @property
+    @classmethod
+    def load_lazy_relationships(cls):
+        locale = str(cls.__translatable__['locale_getter']())
+        translation_cls = cls.__translatable__['class']
+        cls._current_translation = sa.orm.relationship(
+            translation_cls,
+            primaryjoin=sa.and_(
+                cls.id == translation_cls.id,
+                translation_cls.locale == locale
+            ),
+            uselist=False,
+            viewonly=True
+        )
+
+    @hybrid_property
     def translations(self):
         try:
             return self.proxied_translations
@@ -52,6 +68,10 @@ class Translatable(object):
                 'locale'
             )
         return self.proxied_translations
+
+    @translations.expression
+    def translations(cls):
+        return cls._translations
 
     @classmethod
     def __declare_last__(cls):

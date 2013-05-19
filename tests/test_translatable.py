@@ -18,6 +18,11 @@ class TestTranslatableModel(TestCase):
             'ArticleTranslation'
         )
 
+    def test_relationship_consistency(self):
+        article = self.Article()
+        article.name = u'Some article'
+        assert article.current_translation == article.translations['en']
+
     def test_translated_columns(self):
         article = self.Article()
         columns = article.__translatable__['class'].__table__.c
@@ -41,7 +46,7 @@ class TestTranslatableModel(TestCase):
         table = self.Model.metadata.tables['article_translation']
         assert 'locale' in table.c
 
-    def test_current_translation_as_class_level_property(self):
+    def test_current_translation_as_expression(self):
         query = (
             self.session.query(self.Article)
             .join(self.Article.current_translation)
@@ -51,6 +56,17 @@ class TestTranslatableModel(TestCase):
             ' AND article_translation.locale = :locale'
             in str(query)
         )
+
+    def test_translations_as_expression(self):
+        query = (
+            self.session.query(self.Article)
+            .join(self.Article.translations)
+        )
+        assert (
+            'SELECT article.id AS article_id, article.description AS '
+            'article_description \nFROM article JOIN article_translation '
+            'ON article.id = article_translation.id'
+        ) == str(query)
 
     def test_querying(self):
         query = (
@@ -70,3 +86,13 @@ class TestTranslatableModel(TestCase):
             'article_translation.content AS article_translation_content '
             '\nFROM article_translation'
         )
+
+    def test_commit_session(self):
+        article = self.Article()
+        article.name = u'Some article'
+        article.content = u'Some content'
+        self.session.add(article)
+        self.session.commit()
+        article = self.session.query(self.Article).get(1)
+        assert article.name == u'Some article'
+        assert article.content == u'Some content'

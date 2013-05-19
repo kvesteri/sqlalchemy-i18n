@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.2.1 (2013-05-19)
+^^^^^^^^^^^^^^^^^^
+
+- Added hybrid_property expressions for current_translation and translations
+
+
 0.2.0 (2013-05-17)
 ^^^^^^^^^^^^^^^^^^
 
