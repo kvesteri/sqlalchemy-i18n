@@ -6,9 +6,9 @@ from tests import TestCase
 class TestCommonBaseClass(TestCase):
     def create_models(self):
         class Translatable(_Translatable):
+            __locale_getter__ = lambda cls: 'en'
             __translatable__ = {
                 'base_classes': (self.Model, ),
-                'locale_getter': lambda: 'en'
             }
 
         class TextItem(self.Model, Translatable):

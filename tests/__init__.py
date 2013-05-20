@@ -36,8 +36,8 @@ class TestCase(object):
                 sa.Column('name', sa.Unicode(255)),
                 sa.Column('content', sa.UnicodeText)
             ]
+            __locale_getter__ = lambda self: 'en'
             __translatable__ = {
-                'locale_getter': lambda: 'en',
                 'base_classes': (self.Model, )
             }
 

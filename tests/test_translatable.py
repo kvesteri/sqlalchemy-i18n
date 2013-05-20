@@ -96,3 +96,13 @@ class TestTranslatableModel(TestCase):
         article = self.session.query(self.Article).get(1)
         assert article.name == u'Some article'
         assert article.content == u'Some content'
+
+    def test_delete(self):
+        article = self.Article()
+        article.description = u'Some description'
+        self.session.add(article)
+        self.session.commit()
+        article.name = u'Some article'
+        article.content = u'Some content'
+        self.session.delete(article)
+        self.session.commit()
