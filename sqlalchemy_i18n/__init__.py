@@ -9,9 +9,14 @@ class Translatable(object):
     __translatable__ = {}
     __pending__ = []
 
+    def get_locale(self):
+        raise NotImplementedError(
+            'Your translatable model needs to define get_locale method.'
+        )
+
     @hybrid_property
     def current_translation(self):
-        locale = str(self.__locale_getter__())
+        locale = str(self.get_locale())
         if locale in self.translations:
             try:
                 self._current_translation = self.translations[locale]
@@ -30,7 +35,7 @@ class Translatable(object):
 
     @current_translation.setter
     def current_translation(self, obj):
-        locale = str(self.__locale_getter__())
+        locale = str(self.get_locale())
         obj.locale = locale
         self.translations[locale] = obj
 
@@ -44,7 +49,7 @@ class Translatable(object):
 
     @classmethod
     def load_lazy_relationships(cls):
-        locale = str(cls.__locale_getter__.im_func(cls))
+        locale = str(cls.get_locale.im_func(cls))
         translation_cls = cls.__translatable__['class']
         cls._current_translation = sa.orm.relationship(
             translation_cls,

@@ -6,10 +6,12 @@ from tests import TestCase
 class TestCommonBaseClass(TestCase):
     def create_models(self):
         class Translatable(_Translatable):
-            __locale_getter__ = lambda cls: 'en'
             __translatable__ = {
                 'base_classes': (self.Model, ),
             }
+
+            def get_locale(self):
+                return 'en'
 
         class TextItem(self.Model, Translatable):
             __tablename__ = 'text_item'

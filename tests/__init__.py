@@ -36,10 +36,12 @@ class TestCase(object):
                 sa.Column('name', sa.Unicode(255)),
                 sa.Column('content', sa.UnicodeText)
             ]
-            __locale_getter__ = lambda self: 'en'
             __translatable__ = {
                 'base_classes': (self.Model, )
             }
+
+            def get_locale(self):
+                return 'en'
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)

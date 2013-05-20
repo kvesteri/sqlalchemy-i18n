@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.2.3 (2013-05-20)
+^^^^^^^^^^^^^^^^^^
+
+- Renamed __locale_getter__ to get_locale
+
+
 0.2.2 (2013-05-20)
 ^^^^^^^^^^^^^^^^^^
 
