@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.2.4 (2013-05-29)
+^^^^^^^^^^^^^^^^^^
+
+- Updated SQLAlchemy-Utils requirements to 0.12.2
+
+
 0.2.3 (2013-05-20)
 ^^^^^^^^^^^^^^^^^^
 

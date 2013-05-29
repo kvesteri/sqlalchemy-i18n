@@ -1,7 +1,7 @@
 from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
-from sqlalchemy_utils import ProxyDict
+from sqlalchemy_utils import proxy_dict
 from sqlalchemy_utils.functions import primary_keys
 
 
@@ -63,16 +63,11 @@ class Translatable(object):
 
     @hybrid_property
     def translations(self):
-        try:
-            return self.proxied_translations
-        except AttributeError:
-            self.proxied_translations = ProxyDict(
-                self,
-                '_translations',
-                self.__translatable__['class'],
-                'locale'
-            )
-        return self.proxied_translations
+        return proxy_dict(
+            self,
+            '_translations',
+            getattr(self.__translatable__['class'], 'locale')
+        )
 
     @translations.expression
     def translations(cls):
@@ -165,13 +160,12 @@ class TranslationTableBuilder(TranslationBuilder):
     def build_reflected_primary_keys(self):
         columns = []
         for column in primary_keys(self.model):
-            columns.append(
-                sa.Column(
-                    column.name,
-                    column.type,
-                    primary_key=True
-                )
-            )
+            # Make a copy of the column so that it does not point to wrong
+            # table.
+            column_copy = column.copy()
+            # Remove unique constraints
+            column_copy.unique = False
+            columns.append(column_copy)
         return columns
 
     def build_foreign_key(self):
