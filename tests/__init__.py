@@ -37,7 +37,8 @@ class TestCase(object):
                 sa.Column('content', sa.UnicodeText)
             ]
             __translatable__ = {
-                'base_classes': (self.Model, )
+                'base_classes': (self.Model, ),
+                'default_locale': 'en'
             }
 
             def get_locale(self):

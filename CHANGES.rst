@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.3.0 (2013-05-30)
+^^^^^^^^^^^^^^^^^^
+
+- Added force_locale
+- Rewrote current_translation schematics
+
+
 0.2.4 (2013-05-29)
 ^^^^^^^^^^^^^^^^^^
 

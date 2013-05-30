@@ -14,6 +14,7 @@ class TestJoinedTableInheritance(TestCase):
             ]
             __translatable__ = {
                 'base_classes': (self.Model, ),
+                'default_locale': 'en'
             }
 
             def get_locale(self):

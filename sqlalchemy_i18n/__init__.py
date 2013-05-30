@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property, Comparator
@@ -6,59 +7,87 @@ from sqlalchemy_utils.functions import primary_keys
 
 
 class Translatable(object):
-    __translatable__ = {}
+    __translatable__ = {
+        'default_locale': 'en'
+    }
     __pending__ = []
+    _forced_locale = None
 
     def get_locale(self):
         raise NotImplementedError(
             'Your translatable model needs to define get_locale method.'
         )
 
+    @contextmanager
+    def force_locale(self, locale):
+        old_forced_locale = self._forced_locale
+        self._forced_locale = locale
+        yield
+        self._forced_locale = old_forced_locale
+
+    def _get_locale(self):
+        return self._forced_locale or self.get_locale()
+
     @hybrid_property
     def current_translation(self):
-        locale = str(self.get_locale())
+        locale = str(self._get_locale())
         if locale in self.translations:
             try:
-                self._current_translation = self.translations[locale]
-            except AttributeError:
-                self.__class__.load_lazy_relationships()
-                self._current_translation = self.translations[locale]
-
+                setattr(
+                    self,
+                    '_translation_%s' % locale,
+                    self.translations[locale]
+                )
+            except KeyError:
+                self.__class__.init_translation_proxy_window(locale)
+                setattr(
+                    self,
+                    '_translation_%s' % locale,
+                    self.translations[locale]
+                )
             return self.translations[locale]
 
         class_ = self.__translatable__['class']
         obj = class_()
         obj.locale = locale
         self.translations[locale] = obj
-        self._current_translation = obj
+        setattr(
+            self,
+            '_translation_%s' % locale,
+            obj
+        )
         return obj
 
     @current_translation.setter
     def current_translation(self, obj):
-        locale = str(self.get_locale())
+        locale = str(self._get_locale())
         obj.locale = locale
         self.translations[locale] = obj
 
     @current_translation.expression
     def current_translation(cls):
+        locale = str(cls.get_locale.im_func(cls))
         try:
-            return cls._current_translation
+            return getattr(cls, '_translation_%s' % locale)
         except AttributeError:
-            cls.load_lazy_relationships()
-            return cls._current_translation
+            cls.init_translation_proxy_window(locale)
+            return getattr(cls, '_translation_%s' % locale)
 
     @classmethod
-    def load_lazy_relationships(cls):
-        locale = str(cls.get_locale.im_func(cls))
+    def init_translation_proxy_window(cls, locale):
         translation_cls = cls.__translatable__['class']
-        cls._current_translation = sa.orm.relationship(
-            translation_cls,
-            primaryjoin=sa.and_(
-                cls.id == translation_cls.id,
-                translation_cls.locale == locale
-            ),
-            uselist=False,
-            viewonly=True
+        setattr(
+            cls,
+            '_translation_%s' % locale,
+            sa.orm.relationship(
+                translation_cls,
+                primaryjoin=sa.and_(
+                    cls.id == translation_cls.id,
+                    translation_cls.locale == locale
+                ),
+                uselist=False,
+                viewonly=True
+            )
         )
 
     @hybrid_property
@@ -80,7 +109,15 @@ class Translatable(object):
 
 
 def translation_getter_factory(name):
-    return lambda self: getattr(self.current_translation, name)
+    def attribute_getter(self):
+        value = getattr(self.current_translation, name)
+        if value:
+            return value
+
+        default_locale = self.__translatable__['default_locale']
+        return getattr(self.translations[default_locale], name)
+
+    return attribute_getter
 
 
 def translation_setter_factory(name):
