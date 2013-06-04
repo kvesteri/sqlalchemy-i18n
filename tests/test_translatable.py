@@ -30,6 +30,15 @@ class TestTranslatableModel(TestCase):
         assert 'content' in columns
         assert 'description' not in columns
 
+    def test_proxy_contains(self):
+        article = self.Article()
+        article.translations['en']
+        assert 'en' in article.translations
+
+    def test_proxy_not_contains(self):
+        article = self.Article()
+        assert 'en' not in article.translations
+
     def test_property_delegators(self):
         article = self.Article()
         article._translations.count()
