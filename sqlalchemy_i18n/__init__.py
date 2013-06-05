@@ -31,15 +31,11 @@ class Translatable(object):
     @hybrid_property
     def current_translation(self):
         locale = str(self._get_locale())
+        self.init_translation_proxy_window(locale)
+
         if locale in self.translations:
-            try:
-                setattr(
-                    self,
-                    '_translation_%s' % locale,
-                    self.translations[locale]
-                )
-            except KeyError:
-                self.__class__.init_translation_proxy_window(locale)
+            locale_obj = getattr(self, '_translation_%s' % locale)
+            if locale_obj != self.translations[locale]:
                 setattr(
                     self,
                     '_translation_%s' % locale,
@@ -76,19 +72,21 @@ class Translatable(object):
     @classmethod
     def init_translation_proxy_window(cls, locale):
         translation_cls = cls.__translatable__['class']
-        setattr(
-            cls,
-            '_translation_%s' % locale,
-            sa.orm.relationship(
-                translation_cls,
-                primaryjoin=sa.and_(
-                    cls.id == translation_cls.id,
-                    translation_cls.locale == locale
-                ),
-                uselist=False,
-                viewonly=True
+        if not hasattr(cls, '_translation_%s' % locale):
+            setattr(
+                cls,
+                '_translation_%s' % locale,
+                sa.orm.relationship(
+                    translation_cls,
+                    primaryjoin=sa.and_(
+                        cls.id == translation_cls.id,
+                        translation_cls.locale == locale
+                    ),
+                    foreign_keys=[cls.id],
+                    uselist=False,
+                    viewonly=True
+                )
             )
-        )
 
     @hybrid_property
     def translations(self):

@@ -144,3 +144,12 @@ class TestTranslatableModel(TestCase):
                 assert article._get_locale() == 'sv'
             assert article._get_locale() == 'fi'
         assert article._get_locale() == 'en'
+
+    def test_current_translation_as_object_property(self):
+        article = self.Article()
+        article.name = u'Some article'
+        article.content = u'Some content'
+        self.session.add(article)
+        self.session.commit()
+        with article.force_locale('fi'):
+            assert article.current_translation == article._translation_fi
