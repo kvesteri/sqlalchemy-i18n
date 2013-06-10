@@ -152,4 +152,10 @@ class TestTranslatableModel(TestCase):
         self.session.add(article)
         self.session.commit()
         with article.force_locale('fi'):
+            print self.connection.query_count
             assert article.current_translation == article._translation_fi
+
+            assert article.current_translation == article._translation_fi
+            print self.connection.query_count
+            article._translation_fi
+            print self.connection.query_count

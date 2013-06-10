@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.4.0 (2013-06-10)
+^^^^^^^^^^^^^^^^^^
+
+- New, more extendable syntax for setting up translatable models (make_translatable utility function)
+
+
 0.3.2 (2013-06-05)
 ^^^^^^^^^^^^^^^^^^
 
