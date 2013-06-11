@@ -20,6 +20,7 @@ Consider you have already defined SQLAlchemy connections and declarative base as
 
 
 ::
+
     import sqlalchemy as sa
     from sqlalchemy import create_engine
     from sqlalchemy.ext.declarative import declarative_base
@@ -28,6 +29,7 @@ Consider you have already defined SQLAlchemy connections and declarative base as
         'postgres://postgres@localhost/sqlalchemy_i18n'
     )
     Base = declarative_base()
+
 
 
 ::
