@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.4.1 (2013-06-11)
+^^^^^^^^^^^^^^^^^^
+
+- Base classes option no longer mandatory
+
+
 0.4.0 (2013-06-10)
 ^^^^^^^^^^^^^^^^^^
 
