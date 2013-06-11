@@ -31,6 +31,20 @@ Consider you have already defined SQLAlchemy connections and declarative base as
     Base = declarative_base()
 
 
+You only need to define two things, first you have to make the desired mapper translatable using make_translatable() function.
+Internally this function attaches two sqlalchemy event listeners for given mapper.
+
+NOTICE: Calling make_translatable() for given mapper should happen only once per application.
+
+::
+
+    from sqlalchemy_i18n import make_translatable
+
+    make_translatable(sa.orm.mapper)
+
+
+Secondly you need to define translatable models. You can achieve this by making you models extend Translatable mixin and defining __translatable_columns__ class property.
+
 
 ::
 
