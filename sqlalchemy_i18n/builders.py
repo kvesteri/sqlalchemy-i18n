@@ -148,15 +148,26 @@ class TranslationModelBuilder(TranslationBuilder):
             backref=sa.orm.backref('parent'),
         )
 
+    @property
+    def base_classes(self):
+        if self.option('base_classes'):
+            return self.option('base_classes')
+
+        return (self.declarative_base(self.model), )
+
+    def declarative_base(self, model):
+        for parent in model.__bases__:
+            try:
+                parent.metadata
+                return self.declarative_base(parent)
+            except AttributeError:
+                pass
+        return model
+
     def build_model(self, table):
-        if not self.option('base_classes'):
-            raise Exception(
-                'Missing __translatable__ base_classes option for model %s.'
-                % self.model.__name__
-            )
         return type(
             '%sTranslation' % self.model.__name__,
-            self.option('base_classes'),
+            self.base_classes,
             {'__table__': table}
         )
 
