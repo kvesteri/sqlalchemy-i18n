@@ -18,33 +18,29 @@ Basic Usage
 
 Consider you have already defined SQLAlchemy connections and declarative base as follows:
 
-```python
 
-import sqlalchemy as sa
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+::
+    import sqlalchemy as sa
+    from sqlalchemy import create_engine
+    from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine(
-    'postgres://postgres@localhost/sqlalchemy_i18n'
-)
-Base = declarative_base()
-```
-
+    engine = create_engine(
+        'postgres://postgres@localhost/sqlalchemy_i18n'
+    )
+    Base = declarative_base()
 
 
+::
 
+    class Article(Base, Translatable):
+        __translated_columns__ = [
+            sa.Column('name', sa.Unicode(255)),
+            sa.Column('content', sa.UnicodeText)
+        ]
 
-```python
-class Article(Base, Translatable):
-    __translated_columns__ = [
-        sa.Column('name', sa.Unicode(255)),
-        sa.Column('content', sa.UnicodeText)
-    ]
+        id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
 
-    id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-
-    description = sa.Column(sa.UnicodeText)
-```
+        description = sa.Column(sa.UnicodeText)
 
 
 
