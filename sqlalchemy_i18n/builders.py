@@ -92,6 +92,16 @@ class TranslationTableBuilder(TranslationBuilder):
             primary_key=True
         )
 
+    @property
+    def metadata(self):
+        for base in self.model.__bases__:
+            if hasattr(base, 'metadata'):
+                return base.metadata
+
+        raise Exception(
+            'Unable to find base class with appropriate metadata extension'
+        )
+
     def build_table(self, extends=None):
         items = []
         if extends is None:
@@ -103,17 +113,9 @@ class TranslationTableBuilder(TranslationBuilder):
         if extends is None:
             items.append(self.build_foreign_key())
 
-        for base in self.model.__bases__:
-            if hasattr(base, "metadata"):
-                metadata = base.metadata
-                break
-        else:
-            raise Exception("Unable to find base class with appropriate"
-                            " metadata extension")
-
         return sa.schema.Table(
             extends.name if extends is not None else self.table_name,
-            metadata,
+            self.metadata,
             *items,
             extend_existing=extends is not None
         )
