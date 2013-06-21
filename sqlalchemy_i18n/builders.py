@@ -135,7 +135,7 @@ class HybridPropertyBuilder(TranslationBuilder):
 
     def __call__(self):
         for column in self.model.__translated_columns__:
-            self.assign_attr_getter_setters(column.name)
+            self.assign_attr_getter_setters(column.key)
 
 
 class TranslationModelBuilder(TranslationBuilder):
