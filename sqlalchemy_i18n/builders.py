@@ -45,7 +45,8 @@ class TranslationBuilder(object):
         'locale_column_name': 'locale',
     }
 
-    def __init__(self, model):
+    def __init__(self, manager, model):
+        self.manager = manager
         self.model = model
 
     def option(self, name):
@@ -55,10 +56,24 @@ class TranslationBuilder(object):
             return self.DEFAULT_OPTIONS[name]
 
 
-class TranslationTableBuilder(TranslationBuilder):
-    def __init__(self, model):
-        self.model = model
+class HybridPropertyBuilder(TranslationBuilder):
+    def assign_attr_getter_setters(self, attr):
+        setattr(
+            self.model,
+            attr,
+            hybrid_property(
+                fget=translation_getter_factory(attr),
+                fset=translation_setter_factory(attr),
+                expr=lambda cls: getattr(cls.__translatable__['class'], attr)
+            )
+        )
 
+    def __call__(self):
+        for column in self.model.__translated_columns__:
+            self.assign_attr_getter_setters(column.key)
+
+
+class TranslationModelBuilder(TranslationBuilder):
     @property
     def table_name(self):
         return self.option('table_name') % self.model.__tablename__
@@ -93,67 +108,23 @@ class TranslationTableBuilder(TranslationBuilder):
         )
 
     @property
-    def metadata(self):
-        for base in self.model.__bases__:
-            if hasattr(base, 'metadata'):
-                return base.metadata
-
-        raise Exception(
-            'Unable to find base class with appropriate metadata extension'
-        )
-
-    def build_table(self, extends=None):
-        items = []
-        if extends is None:
-            items.extend(self.build_reflected_primary_keys())
-            items.append(self.build_locale_column())
-
-        items.extend(self.model.__translated_columns__)
-
-        if extends is None:
-            items.append(self.build_foreign_key())
-
-        return sa.schema.Table(
-            extends.name if extends is not None else self.table_name,
-            self.metadata,
-            *items,
-            extend_existing=extends is not None
-        )
-
-
-class HybridPropertyBuilder(TranslationBuilder):
-    def assign_attr_getter_setters(self, attr):
-        setattr(
-            self.model,
-            attr,
-            hybrid_property(
-                fget=translation_getter_factory(attr),
-                fset=translation_setter_factory(attr),
-                expr=lambda cls: getattr(cls.__translatable__['class'], attr)
-            )
-        )
-
-    def __call__(self):
-        for column in self.model.__translated_columns__:
-            self.assign_attr_getter_setters(column.key)
-
-
-class TranslationModelBuilder(TranslationBuilder):
-    def build_relationship(self):
-        self.model._translations = sa.orm.relationship(
-            self.translation_class,
-            lazy='dynamic',
-            cascade='all, delete-orphan',
-            passive_deletes=True,
-            backref=sa.orm.backref('parent'),
-        )
+    def columns(self):
+        columns = []
+        if not self.manager.closest_generated_parent(self.model):
+            columns.extend(self.build_reflected_primary_keys())
+            columns.append(self.build_locale_column())
+        columns.extend(self.model.__translated_columns__)
+        return dict([(column.name, column) for column in columns])
 
     @property
     def base_classes(self):
-        if self.option('base_classes'):
-            return self.option('base_classes')
-
-        return (self.declarative_base(self.model), )
+        parent = self.manager.closest_generated_parent(self.model)
+        parent = (parent, ) if parent else None
+        return (
+            parent
+            or self.option('base_classes')
+            or (self.declarative_base(self.model), )
+        )
 
     def declarative_base(self, model):
         for parent in model.__bases__:
@@ -164,19 +135,26 @@ class TranslationModelBuilder(TranslationBuilder):
                 pass
         return model
 
-    def build_model(self, table):
+    def build_model(self):
+        data = {}
+        if not self.manager.closest_generated_parent(self.model):
+            data.update({
+                '__table_args__': (self.build_foreign_key(), ),
+                '__tablename__': self.table_name,
+            })
+        data.update(self.columns)
         return type(
             '%sTranslation' % self.model.__name__,
             self.base_classes,
-            {'__table__': table}
+            data
         )
 
-    def __call__(self, table):
+    def __call__(self):
         # translatable attributes need to be copied for each child class,
         # otherwise each child class would share the same __translatable__
         # option dict
         self.model.__translatable__ = copy(self.model.__translatable__)
-        self.translation_class = self.build_model(table)
-        self.build_relationship()
+        self.translation_class = self.build_model()
         self.model.__translatable__['class'] = self.translation_class
         self.translation_class.__parent_class__ = self.model
+        return self.translation_class

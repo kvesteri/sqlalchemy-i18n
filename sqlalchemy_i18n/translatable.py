@@ -97,8 +97,3 @@ class Translatable(object):
     @translations.expression
     def translations(cls):
         return cls._translations
-
-    @classmethod
-    def __declare_last__(cls):
-        if not cls.__translatable__.get('class'):
-            cls.__pending_translatables__.append(cls)

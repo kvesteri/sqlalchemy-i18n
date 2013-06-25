@@ -11,7 +11,7 @@ def count_sql_calls(conn, cursor, statement, parameters, context, executemany):
     conn.query_count += 1
 
 
-make_translatable(sa.orm.mapper)
+make_translatable()
 
 
 class TestCase(object):

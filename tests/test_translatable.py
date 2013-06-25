@@ -88,13 +88,20 @@ class TestTranslatableModel(TestCase):
         query = (
             self.session.query(self.Article.__translatable__['class'])
         )
-        assert str(query) == (
-            'SELECT article_translation.id AS article_translation_id, '
-            'article_translation.locale AS article_translation_locale, '
-            'article_translation.name AS article_translation_name, '
-            'article_translation.content AS article_translation_content '
-            '\nFROM article_translation'
+        assert 'article_translation.id AS article_translation_id' in str(query)
+        assert (
+            'article_translation.locale AS article_translation_locale'
+            in str(query)
         )
+        assert (
+            'article_translation.name AS article_translation_name'
+            in str(query)
+        )
+        assert (
+            'article_translation.content AS article_translation_content'
+            in str(query)
+        )
+        assert 'FROM article_translation' in str(query)
 
     def test_commit_session(self):
         article = self.Article()
@@ -152,10 +159,7 @@ class TestTranslatableModel(TestCase):
         self.session.add(article)
         self.session.commit()
         with article.force_locale('fi'):
-            print self.connection.query_count
             assert article.current_translation == article._translation_fi
 
             assert article.current_translation == article._translation_fi
-            print self.connection.query_count
             article._translation_fi
-            print self.connection.query_count

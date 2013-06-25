@@ -44,16 +44,16 @@ class TestJoinedTableInheritance(TestCase):
         self.Article = Article
 
     def test_auto_creates_relations(self):
-        textitem = self.TextItem()
-        assert textitem.translations
-        assert textitem._translations
+        # textitem = self.TextItem()
+        # assert textitem.translations
+        # assert textitem._translations
         article = self.Article()
         assert article.translations
         assert article._translations
 
     def test_auto_creates_current_translation(self):
-        textitem = self.TextItem()
-        assert textitem.current_translation
+        # textitem = self.TextItem()
+        # assert textitem.current_translation
         article = self.Article()
         assert article.current_translation
 
@@ -63,10 +63,15 @@ class TestJoinedTableInheritance(TestCase):
         assert class_.__name__ == 'TextItemTranslation'
         article = self.Article()
         class_ = article.__translatable__['class']
-        assert class_.__name__ == 'TextItemTranslation'
+        assert class_.__name__ == 'ArticleTranslation'
 
     def test_inherits_child_properties(self):
         assert self.Article.caption
+
+    def test_table_name(self):
+        article = self.Article()
+        table = article.__translatable__['class'].__table__
+        assert table.name == 'text_item_translation'
 
     def test_translated_columns(self):
         article = self.Article()
