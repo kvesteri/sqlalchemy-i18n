@@ -21,6 +21,9 @@ class TranslationManager(object):
     def __init__(self):
         self.class_map = {}
         self.pending_classes = []
+        self.options = {
+            'auto_created_locales': [],
+        }
 
     def instrument_translatable_classes(self, mapper, cls):
         if issubclass(cls, Translatable):
@@ -53,6 +56,13 @@ class TranslationManager(object):
             passive_deletes=True,
             backref=sa.orm.backref('parent'),
         )
+
+    def auto_create_translations(self, session, flush_context, instances):
+        for obj in session.new:
+            if hasattr(obj, '__translatable__'):
+                for locale in self.options['auto_created_locales']:
+                    if locale not in obj.translations:
+                        obj.translations[locale]
 
 
 translation_manager = TranslationManager()
