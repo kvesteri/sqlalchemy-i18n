@@ -22,7 +22,8 @@ class TranslationManager(object):
         self.class_map = {}
         self.pending_classes = []
         self.options = {
-            'auto_created_locales': [],
+            'locales': [],
+            'auto_create_locales': True,
         }
 
     def instrument_translatable_classes(self, mapper, cls):
@@ -41,26 +42,61 @@ class TranslationManager(object):
         pending_classes_copy = copy(self.pending_classes)
         self.pending_classes = []
         for cls in leaf_classes(pending_classes_copy):
-            self.build_relationship(cls)
+            self.build_relationships(cls)
 
     def closest_generated_parent(self, model):
         for class_ in model.__bases__:
             if class_ in self.class_map:
                 return self.class_map[class_]
 
-    def build_relationship(self, model):
-        model._translations = sa.orm.relationship(
-            model.__translatable__['class'],
-            lazy='dynamic',
-            cascade='all, delete-orphan',
-            passive_deletes=True,
-            backref=sa.orm.backref('parent'),
+    def option(self, model, name):
+        """
+        Returns the option value for given model. If the option is not found
+        from given model falls back to default values of this manager object.
+        If the option is not found from this manager object either this method
+        throws a KeyError.
+
+        :param model: SQLAlchemy declarative object
+        :param name: name of the translation option
+        """
+        try:
+            return model.__translatable__[name]
+        except (AttributeError, KeyError):
+            return self.options[name]
+
+    def build_relationships(self, model):
+        translation_cls = model.__translatable__['class']
+        for locale in self.option(model, 'locales'):
+            setattr(
+                model,
+                '_translation_%s' % locale,
+                sa.orm.relationship(
+                    translation_cls,
+                    primaryjoin=sa.and_(
+                        model.id == translation_cls.id,
+                        translation_cls.locale == locale
+                    ),
+                    foreign_keys=[model.id],
+                    uselist=False,
+                    viewonly=True
+                )
+            )
+        setattr(
+            translation_cls,
+            'translation_parent',
+            sa.orm.relationship(
+                model,
+                uselist=False,
+                cascade='all',
+            )
         )
 
     def auto_create_translations(self, session, flush_context, instances):
+        if not self.options['auto_create_locales']:
+            return
         for obj in session.new:
             if hasattr(obj, '__translatable__'):
-                for locale in self.options['auto_created_locales']:
+                for locale in self.option(obj, 'locales'):
                     if locale not in obj.translations:
                         obj.translations[locale]
 

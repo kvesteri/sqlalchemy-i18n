@@ -7,11 +7,14 @@ from sqlalchemy_utils.functions import primary_keys
 def translation_getter_factory(name):
     def attribute_getter(self):
         value = getattr(self.current_translation, name)
-        if value:
+        if value is not None:
             return value
 
         default_locale = self.__translatable__['default_locale']
-        return getattr(self.translations[default_locale], name)
+        return getattr(
+            getattr(self, '_translation_%s' % default_locale),
+            name
+        )
 
     return attribute_getter
 
@@ -156,5 +159,6 @@ class TranslationModelBuilder(TranslationBuilder):
         self.model.__translatable__ = copy(self.model.__translatable__)
         self.translation_class = self.build_model()
         self.model.__translatable__['class'] = self.translation_class
+        self.model.__translatable__['manager'] = self.manager
         self.translation_class.__parent_class__ = self.model
         return self.translation_class

@@ -14,6 +14,7 @@ class TestJoinedTableInheritance(TestCase):
             ]
             __translatable__ = {
                 'base_classes': (self.Model, ),
+                'locales': ['en', 'fi'],
                 'default_locale': 'en'
             }
 
@@ -49,7 +50,6 @@ class TestJoinedTableInheritance(TestCase):
         # assert textitem._translations
         article = self.Article()
         assert article.translations
-        assert article._translations
 
     def test_auto_creates_current_translation(self):
         # textitem = self.TextItem()
@@ -87,7 +87,6 @@ class TestJoinedTableInheritance(TestCase):
 
     def test_property_delegators(self):
         article = self.Article()
-        article._translations.count()
         article.translations['en']
 
         assert not article.name

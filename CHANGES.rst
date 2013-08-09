@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.0 (2013-08-09)
+^^^^^^^^^^^^^^^^^^
+
+- Completely rewritten translation relationships
+
+
 0.5.1 (2013-06-26)
 ^^^^^^^^^^^^^^^^^^
 

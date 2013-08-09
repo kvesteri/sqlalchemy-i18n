@@ -1,7 +1,5 @@
 from contextlib import contextmanager
-import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_utils import proxy_dict
 
 
 class Translatable(object):
@@ -9,6 +7,7 @@ class Translatable(object):
         'default_locale': 'en'
     }
     __pending_translatables__ = []
+    __locales__ = []
     _forced_locale = None
 
     def get_locale(self):
@@ -29,22 +28,15 @@ class Translatable(object):
     @hybrid_property
     def current_translation(self):
         locale = str(self._get_locale())
-        self.init_translation_proxy_window(locale)
-
-        if locale in self.translations:
-            locale_obj = getattr(self, '_translation_%s' % locale)
-            if locale_obj != self.translations[locale]:
-                setattr(
-                    self,
-                    '_translation_%s' % locale,
-                    self.translations[locale]
-                )
-            return self.translations[locale]
+        locale_obj = getattr(self, '_translation_%s' % locale)
+        if locale_obj:
+            return locale_obj
 
         class_ = self.__translatable__['class']
-        obj = class_()
+
+        obj = class_(translation_parent=self)
+
         obj.locale = locale
-        self.translations[locale] = obj
         setattr(
             self,
             '_translation_%s' % locale,
@@ -61,39 +53,42 @@ class Translatable(object):
     @current_translation.expression
     def current_translation(cls):
         locale = str(cls.get_locale.im_func(cls))
-        try:
-            return getattr(cls, '_translation_%s' % locale)
-        except AttributeError:
-            cls.init_translation_proxy_window(locale)
-            return getattr(cls, '_translation_%s' % locale)
+        return getattr(cls, '_translation_%s' % locale)
 
-    @classmethod
-    def init_translation_proxy_window(cls, locale):
-        translation_cls = cls.__translatable__['class']
-        if not hasattr(cls, '_translation_%s' % locale):
-            setattr(
-                cls,
-                '_translation_%s' % locale,
-                sa.orm.relationship(
-                    translation_cls,
-                    primaryjoin=sa.and_(
-                        cls.id == translation_cls.id,
-                        translation_cls.locale == locale
-                    ),
-                    foreign_keys=[cls.id],
-                    uselist=False,
-                    viewonly=True
-                )
-            )
-
-    @hybrid_property
+    @property
     def translations(self):
-        return proxy_dict(
-            self,
-            '_translations',
-            getattr(self.__translatable__['class'], 'locale')
-        )
+        manager = self.__translatable__['manager']
+        data = {}
+        for locale in manager.option(self, 'locales'):
+            data[locale] = getattr(self, '_translation_%s' % locale)
+        return data
 
-    @translations.expression
-    def translations(cls):
-        return cls._translations
+
+class TranslationsMapping(object):
+    def __init__(self, obj):
+        self.obj = obj
+        self.manager = self.obj.__translatable__['manager']
+
+    def __contains__(self, locale):
+        return locale in self.manager.option(self.obj, 'locales')
+
+    def format_key(self, locale):
+        return  '_translation_%s' % locale
+
+    def __getitem__(self, locale):
+        if locale in self:
+            return getattr(self.obj, self.format_key(locale))
+
+    def __setitem__(self, locale, obj):
+        if locale in self:
+            return getattr(self.obj, self.format_key(locale), obj)
+
+    def items(self):
+        data = []
+        for locale in self.manager.option(self.obj, 'locales'):
+            data.append((locale, self[locale]))
+        return data
+
+    def iteritems(self):
+        for locale in self.manager.option(self.obj, 'locales'):
+            yield locale, self[locale]

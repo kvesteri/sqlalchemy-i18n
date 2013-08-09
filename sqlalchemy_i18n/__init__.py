@@ -10,6 +10,9 @@ __all__ = (
 )
 
 
+__version__ = '0.6.0'
+
+
 def make_translatable(
     mapper=sa.orm.mapper,
     session=sa.orm.session.Session,
