@@ -57,5 +57,5 @@ class TestJoinedLoading(TestCase):
             .options(sa.orm.joinedload(self.Article.current_translation))
         ).first()
         query_count = self.connection.query_count
-        print article.name
+        article.name
         assert query_count == self.connection.query_count
