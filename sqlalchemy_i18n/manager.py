@@ -81,6 +81,7 @@ class TranslationManager(object):
                     viewonly=True
                 )
             )
+
         setattr(
             translation_cls,
             'translation_parent',

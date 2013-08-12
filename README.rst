@@ -43,7 +43,7 @@ NOTICE: Calling make_translatable() for given mapper should happen only once per
     make_translatable(sa.orm.mapper)
 
 
-Secondly you need to define translatable models. You can achieve this by making you models extend Translatable mixin and defining __translatable_columns__ class property.
+Secondly you need to define translatable models. You can achieve this by making you models extend Translatable mixin and defining __translated_columns__ class property.
 
 
 ::
