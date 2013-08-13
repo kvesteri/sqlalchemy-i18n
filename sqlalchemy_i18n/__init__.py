@@ -16,8 +16,11 @@ __version__ = '0.6.0'
 def make_translatable(
     mapper=sa.orm.mapper,
     session=sa.orm.session.Session,
-    manager=translation_manager
+    manager=translation_manager,
+    options={}
 ):
+    manager.options.update(options)
+
     sa.event.listen(
         mapper, 'instrument_class', manager.instrument_translatable_classes
     )

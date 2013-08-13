@@ -154,6 +154,12 @@ class TranslationModelBuilder(TranslationBuilder):
         # translatable attributes need to be copied for each child class,
         # otherwise each child class would share the same __translatable__
         # option dict
+        if not self.option('locales'):
+            raise ImproperlyConfigured(
+                'Either the translation manager or the model class must define'
+                ' available locales as a configuration option.'
+            )
+
         self.model.__translatable__ = copy(self.model.__translatable__)
         self.translation_class = self.build_model()
         self.model.__translatable__['class'] = self.translation_class

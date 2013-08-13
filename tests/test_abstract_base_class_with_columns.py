@@ -13,6 +13,7 @@ class TestAbstractBaseClassWithColumns(TestCase):
             __tablename__ = 'article'
             __translatable__ = {
                 'base_classes': (TranslationBase, ),
+                'locales': ['en', 'fi']
             }
 
             __translated_columns__ = [

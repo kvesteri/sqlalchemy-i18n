@@ -11,7 +11,7 @@ def count_sql_calls(conn, cursor, statement, parameters, context, executemany):
     conn.query_count += 1
 
 
-make_translatable()
+make_translatable(options={'locales': ['en', 'fi']})
 
 
 class TestCase(object):

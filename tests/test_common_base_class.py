@@ -8,6 +8,7 @@ class TestCommonBaseClass(TestCase):
         class Translatable(_Translatable):
             __translatable__ = {
                 'base_classes': (self.Model, ),
+                'locales': ['en']
             }
 
             def get_locale(self):
