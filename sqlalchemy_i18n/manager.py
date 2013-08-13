@@ -24,6 +24,9 @@ class TranslationManager(object):
         self.options = {
             'locales': [],
             'auto_create_locales': True,
+            'base_classes': None,
+            'table_name': '%s_translation',
+            'locale_column_name': 'locale',
         }
 
     def instrument_translatable_classes(self, mapper, cls):

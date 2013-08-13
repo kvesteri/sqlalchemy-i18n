@@ -4,6 +4,10 @@ from sqlalchemy.ext.hybrid import hybrid_property, Comparator
 from sqlalchemy_utils.functions import primary_keys
 
 
+class ImproperlyConfigured(Exception):
+    pass
+
+
 def translation_getter_factory(name):
     def attribute_getter(self):
         value = getattr(self.current_translation, name)
@@ -42,12 +46,6 @@ class TranslationTransformer(Comparator):
 
 
 class TranslationBuilder(object):
-    DEFAULT_OPTIONS = {
-        'base_classes': None,
-        'table_name': '%s_translation',
-        'locale_column_name': 'locale',
-    }
-
     def __init__(self, manager, model):
         self.manager = manager
         self.model = model
@@ -56,7 +54,7 @@ class TranslationBuilder(object):
         try:
             return self.model.__translatable__[name]
         except (AttributeError, KeyError):
-            return self.DEFAULT_OPTIONS[name]
+            return self.manager.options[name]
 
 
 class HybridPropertyBuilder(TranslationBuilder):
