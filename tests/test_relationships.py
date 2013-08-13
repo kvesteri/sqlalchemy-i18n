@@ -16,7 +16,6 @@ class TestRelationships(TestCase):
                 sa.Column('name', sa.Unicode(255)),
             ]
             __translatable__ = {
-                'locale_getter': lambda: 'en',
                 'base_classes': (self.Model, )
             }
 

@@ -6,7 +6,6 @@ class Translatable(object):
     __translatable__ = {
         'default_locale': 'en'
     }
-    __locales__ = []
     _forced_locale = None
 
     def get_locale(self):
