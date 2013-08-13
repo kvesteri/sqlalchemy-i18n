@@ -29,7 +29,7 @@ class TranslationManager(object):
     def instrument_translatable_classes(self, mapper, cls):
         if issubclass(cls, Translatable):
             if (not cls.__translatable__.get('class')
-                    and cls not in cls.__pending_translatables__):
+                    and cls not in self.pending_classes):
                 self.pending_classes.append(cls)
 
     def configure_translatable_classes(self):
