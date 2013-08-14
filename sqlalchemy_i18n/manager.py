@@ -101,8 +101,13 @@ class TranslationManager(object):
         for obj in session.new:
             if hasattr(obj, '__translatable__'):
                 for locale in self.option(obj, 'locales'):
-                    if locale not in obj.translations:
-                        obj.translations[locale]
+                    if obj.translations[locale] is None:
+                        class_ = obj.__translatable__['class']
+                        obj.translations[locale] = class_(
+                            translation_parent=obj,
+                            locale=locale
+                        )
+                        session.add(obj)
 
 
 translation_manager = TranslationManager()

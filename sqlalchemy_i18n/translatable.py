@@ -55,11 +55,7 @@ class Translatable(object):
 
     @property
     def translations(self):
-        manager = self.__translatable__['manager']
-        data = {}
-        for locale in manager.option(self, 'locales'):
-            data[locale] = getattr(self, '_translation_%s' % locale)
-        return data
+        return TranslationsMapping(self)
 
 
 class TranslationsMapping(object):
@@ -79,7 +75,8 @@ class TranslationsMapping(object):
 
     def __setitem__(self, locale, obj):
         if locale in self:
-            return getattr(self.obj, self.format_key(locale), obj)
+
+            setattr(self.obj, self.format_key(locale), obj)
 
     def items(self):
         data = []

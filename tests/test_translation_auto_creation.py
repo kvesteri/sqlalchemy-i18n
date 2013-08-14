@@ -17,4 +17,6 @@ class TestTranslationAutoCreation(TestCase):
         self.session.commit()
 
         assert 'en' in article.translations
+        assert article.translations['en']
         assert 'fi' in article.translations
+        assert article.translations['fi']
