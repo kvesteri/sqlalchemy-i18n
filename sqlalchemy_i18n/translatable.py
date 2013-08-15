@@ -21,7 +21,13 @@ class Translatable(object):
         self._forced_locale = old_forced_locale
 
     def _get_locale(self):
-        return self._forced_locale or self.get_locale()
+        locale = self._forced_locale or self.get_locale()
+        if locale:
+            return locale
+
+        manager = self.__translatable__['manager']
+        if manager.option(self, 'get_locale_fallback'):
+            return manager.option(self, 'default_locale')
 
     @hybrid_property
     def current_translation(self):

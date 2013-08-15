@@ -4,10 +4,16 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.3 (2013-08-15)
+^^^^^^^^^^^^^^^^^^
+
+- Added get_locale_fallback option
+
+
 0.6.2 (2013-08-13)
 ^^^^^^^^^^^^^^^^^^
 
-- Fxied translation auto-creation
+- Fixed translation auto-creation
 
 
 0.6.1 (2013-08-13)
