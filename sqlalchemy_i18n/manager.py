@@ -70,6 +70,11 @@ class TranslationManager(object):
             return self.options[name]
 
     def build_relationships(self, model):
+        """
+        Build translation relationships for given SQLAlchemy declarative model.
+
+        :param model: SQLAlchemy declarative object
+        """
         translation_cls = model.__translatable__['class']
         for locale in self.option(model, 'locales'):
             setattr(
