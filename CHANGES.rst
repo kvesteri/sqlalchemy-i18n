@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.4 (2013-09-10)
+^^^^^^^^^^^^^^^^^^
+
+- Translation hybrid properties now fallback to default locale for empty strings
+
+
 0.6.3 (2013-08-15)
 ^^^^^^^^^^^^^^^^^^
 

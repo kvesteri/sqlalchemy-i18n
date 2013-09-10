@@ -11,7 +11,7 @@ class ImproperlyConfigured(Exception):
 def translation_getter_factory(name):
     def attribute_getter(self):
         value = getattr(self.current_translation, name)
-        if value is not None:
+        if value:
             return value
 
         default_locale = self.__translatable__['default_locale']

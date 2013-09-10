@@ -30,3 +30,11 @@ class TestTranslatableModel(TestCase):
                 assert article._get_locale() == 'sv'
             assert article._get_locale() == 'fi'
         assert article._get_locale() == 'en'
+
+    def test_fallback_locale(self):
+        article = self.Article()
+        article.name = u'Some article'
+        article.content = u'Some content'
+        with article.force_locale('fi'):
+            article.name = u''
+            assert article.name == u'Some article'
