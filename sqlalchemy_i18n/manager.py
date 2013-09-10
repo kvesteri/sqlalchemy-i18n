@@ -73,7 +73,7 @@ class TranslationManager(object):
         """
         Build translation relationships for given SQLAlchemy declarative model.
 
-        :param model: SQLAlchemy declarative object
+        :param model: SQLAlchemy declarative model
         """
         translation_cls = model.__translatable__['class']
         for locale in self.option(model, 'locales'):
@@ -102,19 +102,28 @@ class TranslationManager(object):
             )
         )
 
+    def create_missing_locales(self, obj):
+        """
+        Creates empty locale objects for given SQLAlchemy declarative object.
+
+        :param model: SQLAlchemy declarative model object
+        """
+        session = sa.orm.session.object_session(obj)
+        for locale in self.option(obj, 'locales'):
+            if obj.translations[locale] is None:
+                class_ = obj.__translatable__['class']
+                obj.translations[locale] = class_(
+                    translation_parent=obj,
+                    locale=locale
+                )
+                session.add(obj)
+
     def auto_create_translations(self, session, flush_context, instances):
         if not self.options['auto_create_locales']:
             return
         for obj in session.new:
             if hasattr(obj, '__translatable__'):
-                for locale in self.option(obj, 'locales'):
-                    if obj.translations[locale] is None:
-                        class_ = obj.__translatable__['class']
-                        obj.translations[locale] = class_(
-                            translation_parent=obj,
-                            locale=locale
-                        )
-                        session.add(obj)
+                self.create_missing_locales(obj)
 
 
 translation_manager = TranslationManager()
