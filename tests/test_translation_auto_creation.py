@@ -50,10 +50,29 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
+            discriminator = sa.Column(sa.Unicode(255))
+
+            __mapper_args__ = {
+                'polymorphic_on': discriminator,
+            }
+
+        class ExtendedArticle(Article):
+            __tablename__ = 'extended_article'
+            __translated_columns__ = [
+                sa.Column('content2', sa.UnicodeText, nullable=False)
+            ]
+            __mapper_args__ = {'polymorphic_identity': u'extended'}
+            id = sa.Column(
+                sa.Integer, sa.ForeignKey(Article.id), primary_key=True
+            )
 
         self.Article = Article
+        self.ExtendedArticle = ExtendedArticle
 
     def test_auto_sets_nullables_as_empty_strings(self):
-        article = self.Article(name=u'Some article')
+        article = self.ExtendedArticle(
+            name=u'Some article',
+            content2=u'Some content'
+        )
         self.session.add(article)
         self.session.commit()

@@ -18,6 +18,23 @@ def leaf_classes(classes):
             yield cls
 
 
+def parent_classes(cls):
+    """Simple recursive function for listing the parent classes of given class.
+    """
+    list_of_parents = []
+    for parent in cls.__bases__:
+        list_of_parents.append(parent)
+        list_of_parents.extend(parent_classes(parent))
+    return list_of_parents
+
+
+def all_translated_columns(model):
+    for cls in parent_classes(model) + [model]:
+        if hasattr(cls, '__translated_columns__'):
+            for column in cls.__translated_columns__:
+                yield column
+
+
 class TranslationManager(object):
     def __init__(self):
         self.class_map = {}
@@ -103,6 +120,16 @@ class TranslationManager(object):
             )
         )
 
+    def set_empty_strings_to_not_nullables(self, locale, obj):
+        for column in all_translated_columns(obj.__class__):
+            if (
+                not column.nullable and
+                is_string(column.type) and
+                column.default is None and
+                column.server_default is None
+            ):
+                setattr(obj.translations[locale], column.name, u'')
+
     def create_missing_locales(self, obj):
         """
         Creates empty locale objects for given SQLAlchemy declarative object.
@@ -117,16 +144,7 @@ class TranslationManager(object):
                     translation_parent=obj,
                     locale=locale
                 )
-
-                for column in obj.__translated_columns__:
-                    if (
-                        not column.nullable and
-                        is_string(column.type) and
-                        column.default is None and
-                        column.server_default is None
-                    ):
-                        setattr(obj.translations[locale], column.name, u'')
-
+                self.set_empty_strings_to_not_nullables(locale, obj)
                 session.add(obj)
 
     def auto_create_translations(self, session, flush_context, instances):
