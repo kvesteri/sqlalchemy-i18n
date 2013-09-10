@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.5 (2013-09-10)
+^^^^^^^^^^^^^^^^^^
+
+- Translation auto creation now sets not nullable translated columns without defaults as empty strings
+
+
 0.6.4 (2013-09-10)
 ^^^^^^^^^^^^^^^^^^
 

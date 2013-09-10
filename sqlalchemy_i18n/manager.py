@@ -1,4 +1,5 @@
 from copy import copy
+from inspect import isclass
 import sqlalchemy as sa
 from .translatable import Translatable
 from .builders import (
@@ -116,6 +117,16 @@ class TranslationManager(object):
                     translation_parent=obj,
                     locale=locale
                 )
+
+                for column in obj.__translated_columns__:
+                    if (
+                        not column.nullable and
+                        is_string(column.type) and
+                        column.default is None and
+                        column.server_default is None
+                    ):
+                        setattr(obj.translations[locale], column.name, u'')
+
                 session.add(obj)
 
     def auto_create_translations(self, session, flush_context, instances):
@@ -127,3 +138,10 @@ class TranslationManager(object):
 
 
 translation_manager = TranslationManager()
+
+
+def is_string(type_):
+    return (
+        isinstance(type_, sa.String) or
+        (isclass(type_) and issubclass(type_, sa.String))
+    )
