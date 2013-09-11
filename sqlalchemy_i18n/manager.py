@@ -19,7 +19,8 @@ def leaf_classes(classes):
 
 
 def parent_classes(cls):
-    """Simple recursive function for listing the parent classes of given class.
+    """
+    Simple recursive function for listing the parent classes of given class.
     """
     list_of_parents = []
     for parent in cls.__bases__:
@@ -29,10 +30,12 @@ def parent_classes(cls):
 
 
 def all_translated_columns(model):
+    columns = set()
     for cls in parent_classes(model) + [model]:
         if hasattr(cls, '__translated_columns__'):
             for column in cls.__translated_columns__:
-                yield column
+                columns.add(column)
+    return columns
 
 
 class TranslationManager(object):
@@ -120,7 +123,7 @@ class TranslationManager(object):
             )
         )
 
-    def set_empty_strings_to_not_nullables(self, locale, obj):
+    def set_not_nullables_to_empty_strings(self, locale, obj):
         for column in all_translated_columns(obj.__class__):
             if (
                 not column.nullable and
@@ -144,8 +147,8 @@ class TranslationManager(object):
                     translation_parent=obj,
                     locale=locale
                 )
-                self.set_empty_strings_to_not_nullables(locale, obj)
-                session.add(obj)
+            self.set_not_nullables_to_empty_strings(locale, obj)
+            session.add(obj)
 
     def auto_create_translations(self, session, flush_context, instances):
         if not self.options['auto_create_locales']:

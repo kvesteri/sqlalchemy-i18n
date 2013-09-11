@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.7 (2013-09-11)
+^^^^^^^^^^^^^^^^^^
+
+- Listener set_not_nullables_to_empty_strings invoked even if locale object already exists
+
+
 0.6.6 (2013-09-10)
 ^^^^^^^^^^^^^^^^^^
 
