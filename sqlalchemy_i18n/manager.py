@@ -129,7 +129,8 @@ class TranslationManager(object):
                 not column.nullable and
                 is_string(column.type) and
                 column.default is None and
-                column.server_default is None
+                column.server_default is None and
+                getattr(obj.translations[locale], column.name) is None
             ):
                 setattr(obj.translations[locale], column.name, u'')
 

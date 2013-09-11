@@ -76,3 +76,6 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
         )
         self.session.add(article)
         self.session.commit()
+
+        assert article.translations['en'].name == u'Some article'
+        assert article.translations['fi'].name == u''

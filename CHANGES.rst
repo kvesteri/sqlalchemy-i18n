@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.8 (2013-09-11)
+^^^^^^^^^^^^^^^^^^
+
+- Fixed fatal bug in set_not_nullables_to_empty_strings which would cause setting of already assigned translation columns to empty strings
+
+
 0.6.7 (2013-09-11)
 ^^^^^^^^^^^^^^^^^^
 
