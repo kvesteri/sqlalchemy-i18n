@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import six
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
@@ -31,7 +32,7 @@ class Translatable(object):
 
     @hybrid_property
     def current_translation(self):
-        locale = str(self._get_locale())
+        locale = self._get_locale()
         locale_obj = getattr(self, '_translation_%s' % locale)
         if locale_obj:
             return locale_obj
@@ -50,13 +51,13 @@ class Translatable(object):
 
     @current_translation.setter
     def current_translation(self, obj):
-        locale = str(self._get_locale())
+        locale = self._get_locale()
         obj.locale = locale
         self.translations[locale] = obj
 
     @current_translation.expression
     def current_translation(cls):
-        locale = str(cls.get_locale.im_func(cls))
+        locale = str(six.get_unbound_function(cls.get_locale)(cls))
         return getattr(cls, '_translation_%s' % locale)
 
     @property
