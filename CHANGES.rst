@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.9 (2013-09-13)
+^^^^^^^^^^^^^^^^^^
+
+- Fixed object to string conversion in current_translation methods
+
+
 0.6.8 (2013-09-11)
 ^^^^^^^^^^^^^^^^^^
 

@@ -32,7 +32,7 @@ class Translatable(object):
 
     @hybrid_property
     def current_translation(self):
-        locale = self._get_locale()
+        locale = six.text_type(self._get_locale())
         locale_obj = getattr(self, '_translation_%s' % locale)
         if locale_obj:
             return locale_obj
@@ -51,13 +51,13 @@ class Translatable(object):
 
     @current_translation.setter
     def current_translation(self, obj):
-        locale = self._get_locale()
+        locale = six.text_type(self._get_locale())
         obj.locale = locale
         self.translations[locale] = obj
 
     @current_translation.expression
     def current_translation(cls):
-        locale = str(six.get_unbound_function(cls.get_locale)(cls))
+        locale = six.text_type(six.get_unbound_function(cls.get_locale)(cls))
         return getattr(cls, '_translation_%s' % locale)
 
     @property
