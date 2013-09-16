@@ -52,27 +52,31 @@ Several configuration options exists for SQLAlchemy-i18n. Each of these options 
 
 * locales
 
-Defines the list of locales that given model or manager supports
+    Defines the list of locales that given model or manager supports
 
 * auto_create_locales
 
-Whether or not to auto-create all locales whenever some of the locales is created. By default this option is True. It is highly recommended to leave this as True, since not creating all locales at once can lead to problems in multithreading environments where separate threads might try to lazy-create locales by themselves.
+    Whether or not to auto-create all locales whenever some of the locales is created. By default this option is True. It is highly recommended to leave this as True, since not creating all locales at once can lead to problems in multithreading environments.
+
+    Consider for example the following situtation. User creates a translatable Article which has two translatable fields (name and content). At the first request this article is created along with one translation table entry with locale 'en'.
+
+    After this two users edit the finnish translation of this article at the same time. The application tries to create finnish translation twice resulting in database integrity errors.
 
 * base_classes
 
-What base classes should the translation class use.
+    What base classes should the translation class use.
 
 * table_name
 
-Table name template for translation tables. By default this is '%s_translation', indicating that for example the translation table name of table 'article' would be 'article_translation'.
+    Table name template for translation tables. By default this is '%s_translation', indicating that for example the translation table name of table 'article' would be 'article_translation'.
 
 * locale_column_name
 
-The name of the locale column in translation tables. By default this is 'locale'.
+    The name of the locale column in translation tables. By default this is 'locale'.
 
 * default_locale
 
-Default locale to use. By default this is 'en'.
+    Default locale to use. By default this is 'en'.
 
 * get_locale_fallback
 
