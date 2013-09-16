@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.10 (2013-09-16)
+^^^^^^^^^^^^^^^^^^
+
+- Support for callables as default locales
+
+
 0.6.9 (2013-09-13)
 ^^^^^^^^^^^^^^^^^^
 

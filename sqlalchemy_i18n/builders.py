@@ -15,6 +15,8 @@ def translation_getter_factory(name):
             return value
 
         default_locale = self.__translatable__['default_locale']
+        if callable(default_locale):
+            default_locale = default_locale(self)
         return getattr(
             getattr(self, '_translation_%s' % default_locale),
             name
