@@ -19,7 +19,6 @@ Accessing translations
 Using force_locale
 ------------------
 
-
 Callables as default locale
 ---------------------------
 
