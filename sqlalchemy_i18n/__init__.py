@@ -10,7 +10,7 @@ __all__ = (
 )
 
 
-__version__ = '0.6.9'
+__version__ = '0.6.10'
 
 
 def make_translatable(
