@@ -8,30 +8,6 @@ class ImproperlyConfigured(Exception):
     pass
 
 
-def translation_getter_factory(name):
-    def attribute_getter(self):
-        value = getattr(self.current_translation, name)
-        if value:
-            return value
-
-        default_locale = self.__translatable__['default_locale']
-        if callable(default_locale):
-            default_locale = default_locale(self)
-        return getattr(
-            getattr(self, '_translation_%s' % default_locale),
-            name
-        )
-
-    return attribute_getter
-
-
-def translation_setter_factory(name):
-    return (
-        lambda self, value:
-        setattr(self.current_translation, name, value)
-    )
-
-
 class TranslationTransformer(Comparator):
     def __init__(self, cls):
         self.alias = sa.orm.aliased(cls.__translatable__['class'])
@@ -60,13 +36,35 @@ class TranslationBuilder(object):
 
 
 class HybridPropertyBuilder(TranslationBuilder):
+    def getter_factory(self, name):
+        def attribute_getter(obj):
+            value = getattr(obj.current_translation, name)
+            if value:
+                return value
+
+            default_locale = self.manager.option(obj, 'default_locale')
+            if callable(default_locale):
+                default_locale = default_locale(obj)
+            return getattr(
+                getattr(obj, '_translation_%s' % default_locale),
+                name
+            )
+
+        return attribute_getter
+
+    def setter_factory(self, name):
+        return (
+            lambda obj, value:
+            setattr(obj.current_translation, name, value)
+        )
+
     def assign_attr_getter_setters(self, attr):
         setattr(
             self.model,
             attr,
             hybrid_property(
-                fget=translation_getter_factory(attr),
-                fset=translation_setter_factory(attr),
+                fget=self.getter_factory(attr),
+                fset=self.setter_factory(attr),
                 expr=lambda cls: getattr(cls.__translatable__['class'], attr)
             )
         )
