@@ -69,6 +69,21 @@ class HybridPropertyBuilder(TranslationBuilder):
             )
         )
 
+    def detect_collisions(self, column_name):
+        mapper = sa.inspect(self.model)
+        if not mapper.has_property(column_name):
+            return
+
+        raise ImproperlyConfigured(
+            "Attribute name collision detected. Could not create "
+            "hybrid property for translated attribute '%s'. "
+            "An attribute with the same already exists in parent "
+            "class '%s'." % (
+                column_name,
+                self.model.__name__
+            )
+        )
+
     def __call__(self):
         for column in self.model.__translated_columns__:
             exclude = self.manager.option(
@@ -78,16 +93,7 @@ class HybridPropertyBuilder(TranslationBuilder):
             if column.key in exclude:
                 continue
 
-            if hasattr(self.model, column.key):
-                raise ImproperlyConfigured(
-                    "Attribute name collision detected. Could not create "
-                    " hybrid property for translated attribute '%s'. "
-                    "An attribute with the same already exists in parent "
-                    "class '%s'." % (
-                        column.key,
-                        self.model.__name__
-                    )
-                )
+            self.detect_collisions(column.key)
             self.assign_attr_getter_setters(column.key)
 
 
