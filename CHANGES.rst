@@ -4,10 +4,16 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.6.12 (2013-10-08)
+^^^^^^^^^^^^^^^^^^^
+
+- Added property collision detection for generated hybrid properties
+
+
 0.6.11 (2013-10-07)
 ^^^^^^^^^^^^^^^^^^^
 
-- Support for callables as default locales
+- Hybrid property builder now checks for manager options if class option 'default_locale' is not set.
 
 
 0.6.10 (2013-09-16)
