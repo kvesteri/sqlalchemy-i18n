@@ -85,7 +85,6 @@ class TranslationsMapping(object):
 
     def __setitem__(self, locale, obj):
         if locale in self:
-
             setattr(self.obj, self.format_key(locale), obj)
 
     def items(self):

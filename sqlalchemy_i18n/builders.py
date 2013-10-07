@@ -71,6 +71,13 @@ class HybridPropertyBuilder(TranslationBuilder):
 
     def __call__(self):
         for column in self.model.__translated_columns__:
+            exclude = self.manager.option(
+                self.model, 'exclude_hybrid_properties'
+            )
+
+            if column.key in exclude:
+                continue
+
             if hasattr(self.model, column.key):
                 raise ImproperlyConfigured(
                     "Attribute name collision detected. Could not create "

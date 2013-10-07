@@ -4,10 +4,11 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
-0.6.12 (2013-10-08)
+0.6.12 (2013-10-07)
 ^^^^^^^^^^^^^^^^^^^
 
 - Added property collision detection for generated hybrid properties
+- Added hybrid property exclusion for hybrid property generator
 
 
 0.6.11 (2013-10-07)

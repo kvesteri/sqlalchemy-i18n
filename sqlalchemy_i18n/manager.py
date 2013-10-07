@@ -49,7 +49,8 @@ class TranslationManager(object):
             'table_name': '%s_translation',
             'locale_column_name': 'locale',
             'default_locale': 'en',
-            'get_locale_fallback': False
+            'get_locale_fallback': False,
+            'exclude_hybrid_properties': []
         }
 
     def instrument_translatable_classes(self, mapper, cls):
