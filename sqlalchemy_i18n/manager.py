@@ -3,7 +3,7 @@ from inspect import isclass
 import sqlalchemy as sa
 from .translatable import Translatable
 from .builders import (
-    TranslationModelBuilder, HybridPropertyBuilder
+    TranslationModelBuilder, HybridPropertyBuilder, ImproperlyConfigured
 )
 
 
@@ -59,16 +59,20 @@ class TranslationManager(object):
                 self.pending_classes.append(cls)
 
     def configure_translatable_classes(self):
-        for cls in self.pending_classes:
-            builder = TranslationModelBuilder(self, cls)
-            self.class_map[cls] = builder()
-            builder = HybridPropertyBuilder(self, cls)
-            builder()
+        try:
+            for cls in self.pending_classes:
+                builder = TranslationModelBuilder(self, cls)
+                self.class_map[cls] = builder()
+                builder = HybridPropertyBuilder(self, cls)
+                builder()
 
-        pending_classes_copy = copy(self.pending_classes)
-        self.pending_classes = []
-        for cls in leaf_classes(pending_classes_copy):
-            self.build_relationships(cls)
+            pending_classes_copy = copy(self.pending_classes)
+            self.pending_classes = []
+            for cls in leaf_classes(pending_classes_copy):
+                self.build_relationships(cls)
+        except ImproperlyConfigured:
+            self.pending_classes = []
+            raise
 
     def closest_generated_parent(self, model):
         for class_ in model.__bases__:

@@ -71,6 +71,16 @@ class HybridPropertyBuilder(TranslationBuilder):
 
     def __call__(self):
         for column in self.model.__translated_columns__:
+            if hasattr(self.model, column.key):
+                raise ImproperlyConfigured(
+                    "Attribute name collision detected. Could not create "
+                    " hybrid property for translated attribute '%s'. "
+                    "An attribute with the same already exists in parent "
+                    "class '%s'." % (
+                        column.key,
+                        self.model.__name__
+                    )
+                )
             self.assign_attr_getter_setters(column.key)
 
 

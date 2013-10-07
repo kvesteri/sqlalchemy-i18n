@@ -1,9 +1,11 @@
 import sqlalchemy as sa
+from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager
 from .translatable import Translatable
 
 
 __all__ = (
+    ImproperlyConfigured,
     Translatable,
     TranslationManager,
     translation_manager
