@@ -34,8 +34,8 @@ In order to make your models use SQLAlchemy-i18n you need two things:
     class Article(Base):
         __tablename__ = 'article'
         __translated_columns__ = {
-            name = sa.Column(sa.Unicode(255))
-            content = sa.Column(sa.UnicodeText)
+            sa.Column('name', sa.Unicode(255))
+            sa.Column('content', sa.UnicodeText)
         }
         __translatable__ = {
             'locales': [u'en', u'fi']
