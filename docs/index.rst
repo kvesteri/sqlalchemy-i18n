@@ -1,8 +1,8 @@
 SQLAlchemy-i18n
 ===============
 
-What for?
----------
+SQLAlchemy-i18n is an internationalization extension for SQLAlchemy.
+
 
 Installation
 ------------
@@ -14,11 +14,51 @@ Installation
 QuickStart
 ----------
 
+
+In order to make your models use SQLAlchemy-i18n you need two things:
+
+1. Call make_translatable() before your models are defined.
+2. Add __translatable__ to all models you wish to add internationalization to
+
+
+::
+
+
+    import sqlalchemy as sa
+    from sqlalchemy_continuum import make_translatable
+
+
+    make_versioned()
+
+
+    class Article(Base):
+        __tablename__ = 'article'
+        __translated_columns__ = {
+            name = sa.Column(sa.Unicode(255))
+            content = sa.Column(sa.UnicodeText)
+        }
+
+        id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+
+        author = sa.Column(sa.Unicode(255))
+
+
+
+    article = Article()
+    article.name = u'Some article'
+
+    session.add(article)
+    session.commit()
+
+
+
 Basic usage
 ===========
 
 Accessing translations
 ----------------------
+
+
 
 Using force_locale
 ------------------
