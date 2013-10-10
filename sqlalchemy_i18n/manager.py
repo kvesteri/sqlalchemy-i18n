@@ -1,41 +1,10 @@
 from copy import copy
-from inspect import isclass
 import sqlalchemy as sa
 from .translatable import Translatable
 from .builders import (
     TranslationModelBuilder, HybridPropertyBuilder, ImproperlyConfigured
 )
-
-
-def leaf_classes(classes):
-    for cls in classes:
-        found = False
-        for other_cls in classes:
-            if issubclass(other_cls, cls) and other_cls is not cls:
-                found = True
-                break
-        if not found:
-            yield cls
-
-
-def parent_classes(cls):
-    """
-    Simple recursive function for listing the parent classes of given class.
-    """
-    list_of_parents = []
-    for parent in cls.__bases__:
-        list_of_parents.append(parent)
-        list_of_parents.extend(parent_classes(parent))
-    return list_of_parents
-
-
-def all_translated_columns(model):
-    columns = set()
-    for cls in parent_classes(model) + [model]:
-        if hasattr(cls, '__translated_columns__'):
-            for column in cls.__translated_columns__:
-                columns.add(column)
-    return columns
+from .utils import leaf_classes, all_translated_columns, is_string
 
 
 class TranslationManager(object):
@@ -165,10 +134,3 @@ class TranslationManager(object):
 
 
 translation_manager = TranslationManager()
-
-
-def is_string(type_):
-    return (
-        isinstance(type_, sa.String) or
-        (isclass(type_) and issubclass(type_, sa.String))
-    )
