@@ -63,7 +63,7 @@ class Translatable(object):
         locale = six.text_type(six.get_unbound_function(cls.get_locale)(cls))
         return getattr(cls, '_translation_%s' % locale)
 
-    @property
+    @hybrid_property
     def translations(self):
         return TranslationsMapping(self)
 
@@ -77,7 +77,7 @@ class TranslationsMapping(object):
         return locale in self.manager.option(self.obj, 'locales')
 
     def format_key(self, locale):
-        return  '_translation_%s' % locale
+        return '_translation_%s' % locale
 
     def __getitem__(self, locale):
         if locale in self:

@@ -37,6 +37,9 @@ In order to make your models use SQLAlchemy-i18n you need two things:
             name = sa.Column(sa.Unicode(255))
             content = sa.Column(sa.UnicodeText)
         }
+        __translatable__ = {
+            'locales': [u'en', u'fi']
+        }
 
         id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
 
@@ -57,7 +60,6 @@ Basic usage
 
 Accessing translations
 ----------------------
-
 
 
 Using force_locale

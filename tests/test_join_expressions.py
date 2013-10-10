@@ -51,7 +51,7 @@ class TestJoinedLoading(TestCase):
         self.session.add(article)
         self.session.commit()
 
-    def test_joinedload(self):
+    def test_joinedload_for_current_translation(self):
         article = (
             self.session.query(self.Article)
             .options(sa.orm.joinedload(self.Article.current_translation))
@@ -60,11 +60,20 @@ class TestJoinedLoading(TestCase):
         article.name
         assert query_count == self.connection.query_count
 
-    def test_contains_eager(self):
+    def test_contains_eager_for_current_translation(self):
         article = (
             self.session.query(self.Article)
             .join(self.Article.current_translation)
             .options(sa.orm.contains_eager(self.Article.current_translation))
+        ).first()
+        query_count = self.connection.query_count
+        article.name
+        assert query_count == self.connection.query_count
+
+    def test_joinedload_for_translations(self):
+        article = (
+            self.session.query(self.Article)
+            .options(sa.orm.joinedload(self.Article.translations['en']))
         ).first()
         query_count = self.connection.query_count
         article.name
