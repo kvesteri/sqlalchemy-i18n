@@ -15,6 +15,8 @@ make_translatable(options={'locales': ['en', 'fi']})
 
 
 class TestCase(object):
+    locales = ['en', 'fi']
+
     def setup_method(self, method):
         self.engine = create_engine(
             'postgres://postgres@localhost/sqlalchemy_i18n_test'
@@ -47,7 +49,7 @@ class TestCase(object):
             ]
             __translatable__ = {
                 'base_classes': (self.Model, ),
-                'locales': ['en', 'fi'],
+                'locales': self.locales,
                 'default_locale': 'en'
             }
 
