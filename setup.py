@@ -22,6 +22,19 @@ class PyTest(Command):
         errno = subprocess.call(['py.test'])
         raise SystemExit(errno)
 
+
+extras_require = {
+    'test': [
+        'pytest>=2.2.3',
+        'Pygments>=1.2',
+        'Jinja2>=2.3',
+        'docutils>=0.10',
+        'flexmock>=0.9.7',
+        'psycopg2>=2.4.6',
+    ]
+}
+
+
 setup(
     name='SQLAlchemy-i18n',
     version='0.6.13',
