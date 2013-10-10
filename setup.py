@@ -53,6 +53,7 @@ setup(
         'SQLAlchemy-Utils>=0.12.4',
         'six>=1.4.1'
     ],
+    extras_require=extras_require,
     cmdclass={'test': PyTest},
     classifiers=[
         'Environment :: Web Environment',
