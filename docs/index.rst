@@ -61,6 +61,14 @@ Basic usage
 Accessing translations
 ----------------------
 
+::
+
+
+    article = Article()
+    article.translations['en'].name = u'Some article'
+    session.add(article)
+    session.commit()
+
 
 Using force_locale
 ------------------
@@ -84,6 +92,42 @@ You can force your models to use custom current locale by using force_locale con
 
 Callables as default locale
 ---------------------------
+
+
+Queries
+=======
+
+Joinedload current translation
+------------------------------
+
+::
+
+
+    import sqlalchemy as sa
+
+
+    articles = (
+        session.query(Article)
+        .options(sa.orm.joinedload(Article.current_translation))
+    )
+
+    print articles[0].name
+
+
+Joinedloading arbitrary translations
+------------------------------------
+
+::
+
+    import sqlalchemy as sa
+
+
+    articles = (
+        session.query(Article)
+        .options(sa.orm.joinedload(Article.translations['fi']))
+        .options(sa.orm.joinedload(Article.translations['en']))
+    )
+
 
 
 Configuration
