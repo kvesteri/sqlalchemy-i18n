@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.7.1 (2013-10-10)
+^^^^^^^^^^^^^^^^^^
+
+- Added default_locale utility function
+
+
 0.7.0 (2013-10-10)
 ^^^^^^^^^^^^^^^^^^
 
