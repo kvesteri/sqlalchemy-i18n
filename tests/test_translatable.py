@@ -38,7 +38,7 @@ class TestTranslatableModel(TestCase):
 
     def test_proxy_not_contains(self):
         article = self.Article()
-        assert article.translations['en'] is None
+        assert 'dsadsad' not in article.translations
 
     def test_property_delegators(self):
         article = self.Article()

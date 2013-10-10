@@ -36,21 +36,7 @@ class Translatable(object):
     @hybrid_property
     def current_translation(self):
         locale = six.text_type(self._get_locale())
-        locale_obj = getattr(self, '_translation_%s' % locale)
-        if locale_obj:
-            return locale_obj
-
-        class_ = self.__translatable__['class']
-
-        obj = class_(translation_parent=self)
-
-        obj.locale = locale
-        setattr(
-            self,
-            '_translation_%s' % locale,
-            obj
-        )
-        return obj
+        return self.translations[locale]
 
     @current_translation.setter
     def current_translation(self, obj):
@@ -81,7 +67,18 @@ class TranslationsMapping(object):
 
     def __getitem__(self, locale):
         if locale in self:
-            return getattr(self.obj, self.format_key(locale))
+            key = self.format_key(locale)
+            locale_obj = getattr(self.obj, key)
+            if locale_obj:
+                return locale_obj
+
+            class_ = self.obj.__translatable__['class']
+            locale_obj = class_(
+                translation_parent=self.obj,
+                locale=locale
+            )
+            setattr(self.obj, key, locale_obj)
+            return locale_obj
 
     @property
     def all(self):
