@@ -83,6 +83,14 @@ class TranslationsMapping(object):
         if locale in self:
             return getattr(self.obj, self.format_key(locale))
 
+    @property
+    def all(self):
+        return list(self.values())
+
+    def values(self):
+        for locale in self.manager.option(self.obj, 'locales'):
+            yield self[locale]
+
     def __setitem__(self, locale, obj):
         if locale in self:
             setattr(self.obj, self.format_key(locale), obj)
@@ -94,5 +102,9 @@ class TranslationsMapping(object):
         return data
 
     def iteritems(self):
+        for locale in self.manager.option(self.obj, 'locales'):
+            yield locale, self[locale]
+
+    def __iter__(self):
         for locale in self.manager.option(self.obj, 'locales'):
             yield locale, self[locale]

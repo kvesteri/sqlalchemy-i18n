@@ -70,7 +70,7 @@ class TestJoinedLoading(TestCase):
         article.name
         assert query_count == self.connection.query_count
 
-    def test_joinedload_for_translations(self):
+    def test_joinedload_for_single_translation(self):
         article = (
             self.session.query(self.Article)
             .options(sa.orm.joinedload(self.Article.translations['en']))
