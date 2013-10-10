@@ -2,6 +2,15 @@ from inspect import isclass
 import sqlalchemy as sa
 
 
+def default_locale(obj):
+    class_ = obj.__class__
+    manager = class_.__translatable__['manager']
+    locale = manager.option(class_, 'default_locale')
+    if callable(locale):
+        locale = locale()
+    return locale
+
+
 def leaf_classes(classes):
     for cls in classes:
         found = False

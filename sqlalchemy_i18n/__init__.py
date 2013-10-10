@@ -2,9 +2,11 @@ import sqlalchemy as sa
 from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager
 from .translatable import Translatable
+from .utils import default_locale
 
 
 __all__ = (
+    default_locale,
     ImproperlyConfigured,
     Translatable,
     TranslationManager,
@@ -38,7 +40,6 @@ def find_translations(obj, property_name, locale):
     class_ = obj.__class__
     session = sa.orm.object_session(obj)
     translation_class = class_.__translatable__['class']
-    manager = class_.__translatable__['manager']
 
     property_ = getattr(translation_class, property_name)
 
@@ -49,7 +50,7 @@ def find_translations(obj, property_name, locale):
                 property_ ==
                 getattr(obj, property_name),
                 translation_class.locale ==
-                manager.option(class_, 'default_locale')
+                default_locale(obj)
             )
         )
     )

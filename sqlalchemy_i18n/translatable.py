@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import six
 from sqlalchemy.ext.hybrid import hybrid_property
+from .utils import default_locale
 
 
 class Translatable(object):
@@ -28,10 +29,7 @@ class Translatable(object):
 
         manager = self.__translatable__['manager']
         if manager.option(self, 'get_locale_fallback'):
-            default_locale = manager.option(self, 'default_locale')
-            if callable(default_locale):
-                default_locale = default_locale()
-            return default_locale
+            return default_locale(self)
 
     @hybrid_property
     def current_translation(self):
