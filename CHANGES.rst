@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.7.0 (2013-10-10)
+^^^^^^^^^^^^^^^^^^
+
+- Translatable.translations now a hybrid property instead of regular property (allows flexible querying)
+- New utility function find_translations
+
+
 0.6.13 (2013-10-07)
 ^^^^^^^^^^^^^^^^^^^
 
