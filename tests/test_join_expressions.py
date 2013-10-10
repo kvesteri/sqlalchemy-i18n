@@ -59,3 +59,13 @@ class TestJoinedLoading(TestCase):
         query_count = self.connection.query_count
         article.name
         assert query_count == self.connection.query_count
+
+    def test_contains_eager(self):
+        article = (
+            self.session.query(self.Article)
+            .join(self.Article.current_translation)
+            .options(sa.orm.contains_eager(self.Article.current_translation))
+        ).first()
+        query_count = self.connection.query_count
+        article.name
+        assert query_count == self.connection.query_count
