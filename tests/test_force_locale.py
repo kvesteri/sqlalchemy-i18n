@@ -1,7 +1,7 @@
 from tests import TestCase
 
 
-class TestTranslatableModel(TestCase):
+class TestForceLocale(TestCase):
     def test_hybrid_properties_default_locale(self):
         article = self.Article()
         article.name = u'Some article'
