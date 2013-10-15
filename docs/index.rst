@@ -151,7 +151,18 @@ Joinedloading arbitrary translations
 Configuration
 =============
 
+
 Several configuration options exists for SQLAlchemy-i18n. Each of these options can be set at either manager level or model level. Setting options an manager level affects all models using given translation manager where as model level configuration only affects given model.
+
+
+Dynamic source locale
+---------------------
+
+Sometimes you may want to have dynamic source (default) locale. This can be achieved by setting `dynamic_source_locale` as `True`.
+
+
+Other options
+-------------
 
 
 * locales
