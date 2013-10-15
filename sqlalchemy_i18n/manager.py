@@ -15,6 +15,7 @@ class TranslationManager(object):
             'locales': [],
             'auto_create_locales': True,
             'base_classes': None,
+            'dynamic_source_locale': False,
             'table_name': '%s_translation',
             'locale_column_name': 'locale',
             'default_locale': 'en',

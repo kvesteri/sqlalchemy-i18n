@@ -1,7 +1,11 @@
 from contextlib import contextmanager
 import six
 from sqlalchemy.ext.hybrid import hybrid_property
-from .utils import default_locale
+from .utils import default_locale, option
+
+
+class UnknownLocaleException(Exception):
+    pass
 
 
 class Translatable(object):
@@ -17,6 +21,8 @@ class Translatable(object):
 
     @contextmanager
     def force_locale(self, locale):
+        if locale not in option(self, 'locales'):
+            raise UnknownLocaleException()
         old_forced_locale = self._forced_locale
         self._forced_locale = locale
         yield
@@ -44,7 +50,14 @@ class Translatable(object):
 
     @current_translation.expression
     def current_translation(cls):
-        locale = six.text_type(six.get_unbound_function(cls.get_locale)(cls))
+        manager = cls.__translatable__['manager']
+
+        if manager.option(cls, 'dynamic_source_locale'):
+            return cls._current_translation
+
+        locale = six.text_type(
+            six.get_unbound_function(cls.get_locale)(cls)
+        )
         return getattr(cls, '_translation_%s' % locale)
 
     @hybrid_property

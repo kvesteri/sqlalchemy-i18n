@@ -1,7 +1,11 @@
+from pytest import raises
+from sqlalchemy_i18n import UnknownLocaleException
 from tests import TestCase
 
 
 class TestForceLocale(TestCase):
+    locales = ['en', 'fi', 'sv']
+
     def test_hybrid_properties_default_locale(self):
         article = self.Article()
         article.name = u'Some article'
@@ -38,3 +42,9 @@ class TestForceLocale(TestCase):
         with article.force_locale('fi'):
             article.name = u''
             assert article.name == u'Some article'
+
+    def test_unknown_locale(self):
+        article = self.Article()
+        with raises(UnknownLocaleException):
+            with article.force_locale('some_unknown_locale'):
+                pass

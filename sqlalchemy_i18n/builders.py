@@ -1,26 +1,11 @@
 from copy import copy
 import sqlalchemy as sa
-from sqlalchemy.ext.hybrid import hybrid_property, Comparator
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_utils.functions import primary_keys
 
 
 class ImproperlyConfigured(Exception):
     pass
-
-
-class TranslationTransformer(Comparator):
-    def __init__(self, cls):
-        self.alias = sa.orm.aliased(cls.__translatable__['class'])
-        self.parent = cls
-
-    @property
-    def join(self):
-        def go(q):
-            return q.outerjoin(self.alias, self.parent.current_translation)
-        return go
-
-    def operate(self, op, other):
-        return op(self.alias.name, other)
 
 
 class TranslationBuilder(object):
@@ -188,4 +173,15 @@ class TranslationModelBuilder(TranslationBuilder):
         self.model.__translatable__['class'] = self.translation_class
         self.model.__translatable__['manager'] = self.manager
         self.translation_class.__parent_class__ = self.model
+
+        if self.option('dynamic_source_locale'):
+            self.model._current_translation = sa.orm.relationship(
+                self.translation_class,
+                primaryjoin=sa.and_(
+                    self.translation_class.locale == self.model.locale,
+                    self.translation_class.id == self.model.id
+                ),
+                viewonly=True,
+                uselist=False
+            )
         return self.translation_class

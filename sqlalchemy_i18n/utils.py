@@ -2,6 +2,12 @@ from inspect import isclass
 import sqlalchemy as sa
 
 
+def option(obj, option):
+    class_ = obj.__class__
+    manager = class_.__translatable__['manager']
+    return manager.option(class_, option)
+
+
 def default_locale(obj):
     class_ = obj.__class__
     manager = class_.__translatable__['manager']
