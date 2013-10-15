@@ -45,6 +45,8 @@ In order to make your models use SQLAlchemy-i18n you need two things:
 
         author = sa.Column(sa.Unicode(255))
 
+        def get_locale(self):
+            return 'en'
 
 
     article = Article()
@@ -57,6 +59,20 @@ In order to make your models use SQLAlchemy-i18n you need two things:
 
 Basic usage
 ===========
+
+Translatable columns as hybrids
+-------------------------------
+
+For each translatable column SQLAlchemy-i18n creates a hybrid property in the parent class. These hybrid properties always point at the current translation.
+
+Example: ::
+
+
+    article = Article()
+    article.name = u'Some article'
+
+    print article.translations['en'].name  # u'Some article'
+
 
 Accessing translations
 ----------------------
@@ -85,8 +101,10 @@ You can force your models to use custom current locale by using force_locale con
     article.translations['en'].name = u'Some article'
 
 
+    print article.name  # u'Some article'
+
     with article.force_locale('fi'):
-        print article.name  # 'Joku artikkeli'
+        print article.name  # u'Joku artikkeli'
 
 
 
