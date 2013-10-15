@@ -161,6 +161,58 @@ Dynamic source locale
 Sometimes you may want to have dynamic source (default) locale. This can be achieved by setting `dynamic_source_locale` as `True`.
 
 
+Consider the following model definition:
+
+::
+
+
+    class Article(Base):
+        __tablename__ = 'article'
+        __translated_columns__ = {
+            sa.Column('name', sa.Unicode(255))
+            sa.Column('content', sa.UnicodeText)
+        }
+        __translatable__ = {
+            'locales': [u'en', u'fi'],
+            'dynamic_source_locale': True
+        }
+
+        id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+
+        author = sa.Column(sa.Unicode(255))
+
+        def get_locale(self):
+            return 'en'
+
+
+
+Now you can use the dynamic source locales as follows:
+
+
+::
+
+
+    article = Article(locale='fi', name=u'Joku artikkeli')
+    article.name == article.translations['fi'].name  # True
+
+    article2 = Article(locale='en', name=u'Some article)
+    article2.name == article.translations['en'].name  # True
+
+
+
+As with regular translations, the translations using dynamic source locales can even be fetched efficiently using good old SQLAlchemy loading constructs:
+
+::
+
+
+    articles = (
+        session.query(Article)
+        .options(sa.orm.joinedload(Article.current_translation))
+    )  # loads translations based on the locale in the parent class
+
+
+
+
 Other options
 -------------
 
