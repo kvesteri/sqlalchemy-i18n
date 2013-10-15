@@ -28,7 +28,7 @@ In order to make your models use SQLAlchemy-i18n you need two things:
     from sqlalchemy_continuum import make_translatable
 
 
-    make_versioned()
+    make_translatable()
 
 
     class Article(Base):
