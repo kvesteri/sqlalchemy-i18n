@@ -21,7 +21,7 @@ class TestFindTranslations(TestCase):
         self.session.add(article)
         self.session.commit()
         assert dict(find_translations(article, 'name', 'fi')) == {
-            u'Joku artikkeli': Decimal(1.0)
+            u'Joku artikkeli': Decimal('1.0')
         }
 
     def test_with_varying_confidence(self):
@@ -46,6 +46,6 @@ class TestFindTranslations(TestCase):
         self.session.commit()
 
         assert dict(find_translations(article, 'name', 'fi').all()) == {
-            u'Joku artikkeli': Decimal(0.5),
-            u'Joku toinen artikkeli': Decimal(0.5)
+            u'Joku artikkeli': Decimal('0.5'),
+            u'Joku toinen artikkeli': Decimal('0.5')
         }
