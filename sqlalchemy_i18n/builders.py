@@ -1,7 +1,7 @@
 from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_utils.functions import primary_keys
+from sqlalchemy_utils.functions import primary_keys, declarative_base
 
 
 class ImproperlyConfigured(Exception):
@@ -132,17 +132,8 @@ class TranslationModelBuilder(TranslationBuilder):
         return (
             parent
             or self.option('base_classes')
-            or (self.declarative_base(self.model), )
+            or (declarative_base(self.model), )
         )
-
-    def declarative_base(self, model):
-        for parent in model.__bases__:
-            try:
-                parent.metadata
-                return self.declarative_base(parent)
-            except AttributeError:
-                pass
-        return model
 
     def build_model(self):
         data = {}
