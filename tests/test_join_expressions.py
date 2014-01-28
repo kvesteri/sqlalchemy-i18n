@@ -1,6 +1,4 @@
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_i18n import Translatable
 from tests import TestCase
 
@@ -53,6 +51,7 @@ class TestJoinedLoading(TestCase):
         )
         self.session.add(article)
         self.session.commit()
+        self.session.expunge_all()
 
     def test_joinedload_for_current_translation(self):
         article = (
@@ -80,6 +79,25 @@ class TestJoinedLoading(TestCase):
         ).first()
         query_count = self.connection.query_count
         article.name
+        assert query_count == self.connection.query_count
+
+    def test_joinedload_for_attr_accessor(self):
+        article = (
+            self.session.query(self.Article)
+            .options(sa.orm.joinedload(self.Article.translations.en))
+        ).first()
+        query_count = self.connection.query_count
+        article.name
+        assert query_count == self.connection.query_count
+
+    def test_joinedload_for_all_translations(self):
+        article = (
+            self.session.query(self.Article)
+            .options(sa.orm.joinedload(self.Article.translations))
+        ).first()
+        query_count = self.connection.query_count
+        article.name
+        article.translations['fi'].name
         assert query_count == self.connection.query_count
 
 

@@ -64,6 +64,10 @@ class Translatable(object):
     def translations(self):
         return TranslationsMapping(self)
 
+    @translations.expression
+    def translations(self):
+        return self._translations
+
 
 class TranslationsMapping(object):
     def __init__(self, obj):

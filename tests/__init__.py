@@ -1,3 +1,5 @@
+import warnings
+
 import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -12,6 +14,9 @@ def count_sql_calls(conn, cursor, statement, parameters, context, executemany):
 
 
 make_translatable(options={'locales': ['en', 'fi']})
+
+
+warnings.simplefilter('error', sa.exc.SAWarning)
 
 
 class TestCase(object):
