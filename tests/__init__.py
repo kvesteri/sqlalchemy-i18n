@@ -21,6 +21,12 @@ warnings.simplefilter('error', sa.exc.SAWarning)
 
 class TestCase(object):
     locales = ['en', 'fi']
+    create_tables = True
+    configure_mappers = True
+
+    def create_session(self):
+        Session = sessionmaker(bind=self.connection)
+        self.session = Session()
 
     def setup_method(self, method):
         self.engine = create_engine(
@@ -33,11 +39,11 @@ class TestCase(object):
 
         self.create_models()
 
-        sa.orm.configure_mappers()
-        self.Model.metadata.create_all(self.connection)
-
-        Session = sessionmaker(bind=self.connection)
-        self.session = Session()
+        if self.configure_mappers:
+            sa.orm.configure_mappers()
+        if self.create_tables:
+            self.Model.metadata.create_all(self.connection)
+        self.create_session()
 
     def teardown_method(self, method):
         self.session.close_all()

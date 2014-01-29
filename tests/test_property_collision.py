@@ -1,11 +1,13 @@
 from pytest import raises
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_i18n import Translatable, ImproperlyConfigured
 from tests import TestCase
 
 
 class TestPropertyCollision(TestCase):
+    configure_mappers = False
+    create_tables = False
+
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
@@ -30,17 +32,6 @@ class TestPropertyCollision(TestCase):
 
         self.Article = Article
 
-    def setup_method(self, method):
-        self.engine = sa.create_engine(
-            'postgres://postgres@localhost/sqlalchemy_i18n_test'
-        )
-        self.Model = declarative_base()
-
-        self.create_models()
-
     def test_raises_exception(self):
         with raises(ImproperlyConfigured):
             self.Article()
-
-    def teardown_method(self, method):
-        self.engine.dispose()
