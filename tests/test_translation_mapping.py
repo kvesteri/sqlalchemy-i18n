@@ -46,3 +46,7 @@ class TestTranslationMapping(TestCase):
             repr(article.translations) ==
             'TranslationsMapping(Article(id=%d))' % article.id
         )
+
+    def test_iter(self):
+        article = self.create_article()
+        assert len(list(article.translations)) == 2
