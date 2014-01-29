@@ -50,3 +50,10 @@ class TestTranslationMapping(TestCase):
     def test_iter(self):
         article = self.create_article()
         assert len(list(article.translations)) == 2
+
+    def test_values(self):
+        article = self.create_article()
+        values = list(article.translations.values())
+        for value in values:
+            assert isinstance(value, article.__translatable__['class'])
+        assert len(values) == 2
