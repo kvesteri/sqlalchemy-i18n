@@ -121,7 +121,7 @@ class TranslationManager(object):
             sa.orm.relationship(
                 model,
                 uselist=False,
-                cascade='all',
+                viewonly=True
             )
         )
 

@@ -70,6 +70,15 @@ class Translatable(object):
         return self._translations
 
 
+@sa.event.listens_for(sa.orm.mapper, 'expire')
+def receive_expire(target, attrs):
+    if isinstance(target, Translatable):
+        try:
+            del target._translations_mapping
+        except AttributeError:
+            pass
+
+
 class TranslationsMapping(object):
     def __init__(self, obj):
         self.obj = obj
@@ -83,9 +92,12 @@ class TranslationsMapping(object):
 
     def fetch(self, locale):
         session = sa.orm.object_session(self.obj)
-        # If the object has identity and its in session, get the locale
-        # object from the relationship.
-        if not session or not has_identity(self.obj):
+        # If the object has no identity and its not in session or if the object
+        # has _translations relationship loaded get the locale object from the
+        # relationship.
+        if '_translations' not in sa.inspect(self.obj).unloaded or (
+            not session or not has_identity(self.obj)
+        ):
             return self.obj._translations.get(locale)
         return session.query(self.obj.__translatable__['class']).get(
             (self.obj.id, locale)
@@ -94,7 +106,7 @@ class TranslationsMapping(object):
     def __getitem__(self, locale):
         if locale in self:
             locale_obj = self.fetch(locale)
-            if locale_obj:
+            if locale_obj is not None:
                 return locale_obj
 
             class_ = self.obj.__translatable__['class']
@@ -117,9 +129,14 @@ class TranslationsMapping(object):
         for locale in self.manager.option(self.obj, 'locales'):
             yield self[locale]
 
-    def __setitem__(self, locale, obj):
+    def __setitem__(self, locale, translation_obj):
         if locale in self:
-            setattr(self.obj, self.format_key(locale), obj)
+            translation_obj.translation_parent = self.obj
+            translation_obj.locale = locale
+            self.obj._translations[locale] = translation_obj
+
+    # def __repr__(self):
+    #     pass
 
     def items(self):
         return [

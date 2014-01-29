@@ -71,3 +71,9 @@ class TestCase(object):
             description = sa.Column(sa.UnicodeText)
 
         self.Article = Article
+
+    def create_article(self):
+        article = self.Article(name=u'Something', content=u'Something')
+        self.session.add(article)
+        self.session.commit()
+        return article
