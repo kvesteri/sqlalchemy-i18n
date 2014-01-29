@@ -20,4 +20,4 @@ class TestTranslationMapping(TestCase):
 
     def test_proxy_not_contains(self):
         article = self.Article()
-        assert 'dsadsad' not in article.translations
+        assert 'unknown_locale' not in article.translations
