@@ -1,10 +1,12 @@
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_i18n import Translatable
 from tests import TestCase
 
 
 class TestHybridPropertyExclusion(TestCase):
+    create_tables = False
+    configure_mappers = False
+
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
@@ -31,16 +33,5 @@ class TestHybridPropertyExclusion(TestCase):
 
         self.Article = Article
 
-    def setup_method(self, method):
-        self.engine = sa.create_engine(
-            'postgres://postgres@localhost/sqlalchemy_i18n_test'
-        )
-        self.Model = declarative_base()
-
-        self.create_models()
-
     def test_does_not_generate_hybrid_properties(self):
         self.Article()
-
-    def teardown_method(self, method):
-        self.engine.dispose()
