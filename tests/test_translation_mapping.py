@@ -26,6 +26,13 @@ class TestTranslationMapping(TestCase):
         article = self.create_article()
         assert isinstance(article.translations.items(), list)
 
+    def test_iteritems(self):
+        article = self.create_article()
+        assert (
+            article.translations.items() ==
+            list(article.translations.iteritems())
+        )
+
     def test_set_item(self):
         article = self.create_article()
         self.session.expunge_all()
