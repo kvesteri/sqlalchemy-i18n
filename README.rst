@@ -1,6 +1,8 @@
 SQLAlchemy-i18n
 ===============
 
+|Build Status| |Version Status| |Downloads|
+
 Internationalization extension for SQLAlchemy models.
 
 
@@ -66,3 +68,10 @@ Resources
 - `Documentation <http://sqlalchemy-i18n.readthedocs.org/>`_
 - `Issue Tracker <http://github.com/kvesteri/sqlalchemy-i18n/issues>`_
 - `Code <http://github.com/kvesteri/sqlalchemy-i18n/>`_
+
+.. |Build Status| image:: https://travis-ci.org/kvesteri/sqlalchemy-i18n.png?branch=master
+   :target: https://travis-ci.org/kvesteri/sqlalchemy-i18n
+.. |Version Status| image:: https://pypip.in/v/SQLAlchemy-i18n/badge.png
+   :target: https://crate.io/packages/SQLAlchemy-i18n/
+.. |Downloads| image:: https://pypip.in/d/SQLAlchemy-i18n/badge.png
+   :target: https://crate.io/packages/SQLAlchemy-i18n/
