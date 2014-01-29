@@ -23,16 +23,5 @@ class TestPropertyCollisionWithSingleTableInheritance(TestCase):
         self.TextItem = TextItem
         self.Article = Article
 
-    def setup_method(self, method):
-        self.engine = sa.create_engine(
-            'postgres://postgres@localhost/sqlalchemy_i18n_test'
-        )
-        self.Model = declarative_base()
-
-        self.create_models()
-
     def test_model_initialization(self):
         self.Article()
-
-    def teardown_method(self, method):
-        self.engine.dispose()
