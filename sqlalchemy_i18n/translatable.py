@@ -1,11 +1,10 @@
 from contextlib import contextmanager
 import six
+import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm.util import has_identity
+from .exc import UnknownLocaleError
 from .utils import default_locale, option
-
-
-class UnknownLocaleException(Exception):
-    pass
 
 
 class Translatable(object):
@@ -22,7 +21,7 @@ class Translatable(object):
     @contextmanager
     def force_locale(self, locale):
         if locale not in option(self, 'locales'):
-            raise UnknownLocaleException()
+            raise UnknownLocaleError(locale, self)
         old_forced_locale = self._forced_locale
         self._forced_locale = locale
         yield
@@ -32,10 +31,7 @@ class Translatable(object):
         locale = self._forced_locale or self.get_locale()
         if locale:
             return locale
-
-        manager = self.__translatable__['manager']
-        if manager.option(self, 'get_locale_fallback'):
-            return default_locale(self)
+        return default_locale(self)
 
     @hybrid_property
     def current_translation(self):
@@ -50,9 +46,7 @@ class Translatable(object):
 
     @current_translation.expression
     def current_translation(cls):
-        manager = cls.__translatable__['manager']
-
-        if manager.option(cls, 'dynamic_source_locale'):
+        if option(cls, 'dynamic_source_locale'):
             return cls._current_translation
 
         locale = six.text_type(
@@ -62,7 +56,13 @@ class Translatable(object):
 
     @hybrid_property
     def translations(self):
-        return TranslationsMapping(self)
+        if not hasattr(self, '_translations_mapping'):
+            self._translations_mapping = TranslationsMapping(self)
+        return self._translations_mapping
+
+    @translations.expression
+    def translations(self):
+        return self._translations
 
 
 class TranslationsMapping(object):
@@ -76,10 +76,19 @@ class TranslationsMapping(object):
     def format_key(self, locale):
         return '_translation_%s' % locale
 
+    def fetch(self, locale):
+        session = sa.orm.object_session(self.obj)
+        # If the object has identity and its in session, get the locale
+        # object from the relationship.
+        if not session or not has_identity(self.obj):
+            return self.obj._translations.get(locale)
+        return session.query(self.obj.__translatable__['class']).get(
+            (self.obj.id, locale)
+        )
+
     def __getitem__(self, locale):
         if locale in self:
-            key = self.format_key(locale)
-            locale_obj = getattr(self.obj, key)
+            locale_obj = self.fetch(locale)
             if locale_obj:
                 return locale_obj
 
@@ -88,7 +97,7 @@ class TranslationsMapping(object):
                 translation_parent=self.obj,
                 locale=locale
             )
-            setattr(self.obj, key, locale_obj)
+            self.obj._translations[locale] = locale_obj
             return locale_obj
 
     @property
@@ -104,10 +113,10 @@ class TranslationsMapping(object):
             setattr(self.obj, self.format_key(locale), obj)
 
     def items(self):
-        data = []
-        for locale in self.manager.option(self.obj, 'locales'):
-            data.append((locale, self[locale]))
-        return data
+        return [
+            (locale, self[locale])
+            for locale in self.manager.option(self.obj, 'locales')
+        ]
 
     def iteritems(self):
         for locale in self.manager.option(self.obj, 'locales'):

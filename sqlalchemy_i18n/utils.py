@@ -2,8 +2,8 @@ from inspect import isclass
 import sqlalchemy as sa
 
 
-def option(obj, option):
-    class_ = obj.__class__
+def option(obj_or_class, option):
+    class_ = obj_or_class if isclass(obj_or_class) else obj_or_class.__class__
     manager = class_.__translatable__['manager']
     return manager.option(class_, option)
 

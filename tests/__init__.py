@@ -1,3 +1,5 @@
+import warnings
+
 import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -14,6 +16,9 @@ def count_sql_calls(conn, cursor, statement, parameters, context, executemany):
 make_translatable(options={'locales': ['en', 'fi']})
 
 
+warnings.simplefilter('error', sa.exc.SAWarning)
+
+
 class TestCase(object):
     locales = ['en', 'fi']
 
@@ -21,7 +26,7 @@ class TestCase(object):
         self.engine = create_engine(
             'postgres://postgres@localhost/sqlalchemy_i18n_test'
         )
-        #self.engine.echo = True
+        # self.engine.echo = True
         self.connection = self.engine.connect()
         self.connection.query_count = 0
         self.Model = declarative_base()

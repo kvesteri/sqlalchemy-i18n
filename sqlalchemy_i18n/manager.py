@@ -4,7 +4,23 @@ from .translatable import Translatable
 from .builders import (
     TranslationModelBuilder, HybridPropertyBuilder, ImproperlyConfigured
 )
+from sqlalchemy.orm.relationships import RelationshipProperty
+from sqlalchemy.orm.collections import attribute_mapped_collection
+from .exc import UnknownLocaleError
 from .utils import leaf_classes, all_translated_columns, is_string
+
+
+
+class TranslationComparator(RelationshipProperty.Comparator):
+    def __getitem__(self, key):
+        return getattr(self._parentmapper.class_, '_translation_%s' % key)
+
+    def __getattr__(self, locale):
+        class_ = self._parentmapper.class_
+        try:
+            return getattr(class_, '_translation_%s' % locale)
+        except AttributeError:
+            raise UnknownLocaleError(locale, class_)
 
 
 class TranslationManager(object):
@@ -86,6 +102,17 @@ class TranslationManager(object):
                     uselist=False,
                     viewonly=True
                 )
+            )
+
+        if not hasattr(model, '_translations'):
+            model._translations = sa.orm.relationship(
+                translation_cls,
+                primaryjoin=model.id == translation_cls.id,
+                foreign_keys=[translation_cls.id],
+                collection_class=attribute_mapped_collection('locale'),
+                comparator_factory=TranslationComparator,
+                cascade='all, delete-orphan',
+                passive_deletes=True,
             )
 
         setattr(

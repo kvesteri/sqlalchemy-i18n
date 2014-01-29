@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm.attributes import set_committed_value
 from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager
-from .translatable import Translatable, UnknownLocaleException
+from .translatable import Translatable, UnknownLocaleError
 from .utils import default_locale
 
 
@@ -12,7 +12,7 @@ __all__ = (
     Translatable,
     TranslationManager,
     translation_manager,
-    UnknownLocaleException
+    UnknownLocaleError
 )
 
 

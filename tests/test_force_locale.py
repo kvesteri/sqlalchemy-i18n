@@ -1,5 +1,5 @@
 from pytest import raises
-from sqlalchemy_i18n import UnknownLocaleException
+from sqlalchemy_i18n import UnknownLocaleError
 from tests import TestCase
 
 
@@ -45,6 +45,6 @@ class TestForceLocale(TestCase):
 
     def test_unknown_locale(self):
         article = self.Article()
-        with raises(UnknownLocaleException):
+        with raises(UnknownLocaleError):
             with article.force_locale('some_unknown_locale'):
                 pass
