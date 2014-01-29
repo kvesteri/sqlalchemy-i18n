@@ -19,8 +19,8 @@ Joinedload current translation
     print articles[0].name
 
 
-Joinedloading arbitrary translations
-------------------------------------
+Joinedload arbitrary translations
+---------------------------------
 
 ::
 
@@ -31,4 +31,18 @@ Joinedloading arbitrary translations
         session.query(Article)
         .options(sa.orm.joinedload(Article.translations['fi']))
         .options(sa.orm.joinedload(Article.translations['en']))
+    )
+
+
+Joinedload all translations
+--------------------------
+
+::
+
+    import sqlalchemy as sa
+
+
+    articles = (
+        session.query(Article)
+        .options(sa.orm.joinedload(Article.translations))
     )
