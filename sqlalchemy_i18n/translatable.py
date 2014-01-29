@@ -42,7 +42,8 @@ class Translatable(object):
     def current_translation(self, obj):
         locale = six.text_type(self._get_locale())
         obj.locale = locale
-        self.translations[locale] = obj
+        obj.translation_parent = self
+        self._translations[locale] = obj
 
     @current_translation.expression
     def current_translation(cls):
