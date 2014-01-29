@@ -135,8 +135,8 @@ class TranslationsMapping(object):
             translation_obj.locale = locale
             self.obj._translations[locale] = translation_obj
 
-    # def __repr__(self):
-    #     pass
+    def __repr__(self):
+        return 'TranslationsMapping(%r)' % self.obj
 
     def items(self):
         return [

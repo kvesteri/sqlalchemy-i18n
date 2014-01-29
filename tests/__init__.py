@@ -70,6 +70,9 @@ class TestCase(object):
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
 
+            def __repr__(self):
+                return 'Article(id=%d)' % self.id
+
         self.Article = Article
 
     def create_article(self):

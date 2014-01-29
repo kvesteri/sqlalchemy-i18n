@@ -39,3 +39,10 @@ class TestTranslationMapping(TestCase):
         article = self.session.query(self.Article).first()
 
         assert article.translations['en'].name == u'Some other thing'
+
+    def test_repr(self):
+        article = self.create_article()
+        assert (
+            repr(article.translations) ==
+            'TranslationsMapping(Article(id=%d))' % article.id
+        )
