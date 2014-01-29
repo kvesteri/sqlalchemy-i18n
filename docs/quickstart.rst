@@ -19,7 +19,7 @@ In order to make your models use SQLAlchemy-i18n you need two things:
 
 
     import sqlalchemy as sa
-    from sqlalchemy_continuum import make_translatable
+    from sqlalchemy_i18n import make_translatable
 
 
     make_translatable()
