@@ -26,7 +26,7 @@ class TestCase(object):
         self.engine = create_engine(
             'postgres://postgres@localhost/sqlalchemy_i18n_test'
         )
-        #self.engine.echo = True
+        # self.engine.echo = True
         self.connection = self.engine.connect()
         self.connection.query_count = 0
         self.Model = declarative_base()

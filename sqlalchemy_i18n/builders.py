@@ -31,7 +31,7 @@ class HybridPropertyBuilder(TranslationBuilder):
             if callable(default_locale):
                 default_locale = default_locale(obj)
             return getattr(
-                getattr(obj, '_translation_%s' % default_locale),
+                obj.translations[default_locale],
                 name
             )
 

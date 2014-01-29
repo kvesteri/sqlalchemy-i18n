@@ -5,6 +5,7 @@ from .builders import (
     TranslationModelBuilder, HybridPropertyBuilder, ImproperlyConfigured
 )
 from sqlalchemy.orm.relationships import RelationshipProperty
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from .utils import leaf_classes, all_translated_columns, is_string
 
 
@@ -105,6 +106,7 @@ class TranslationManager(object):
                 translation_cls,
                 primaryjoin=model.id == translation_cls.id,
                 foreign_keys=[translation_cls.id],
+                collection_class=attribute_mapped_collection('locale'),
                 comparator_factory=TranslationComparator,
                 cascade='all, delete-orphan',
                 passive_deletes=True,
