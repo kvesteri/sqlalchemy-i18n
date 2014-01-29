@@ -1,5 +1,3 @@
-import sqlalchemy as sa
-from sqlalchemy_i18n import Translatable
 from tests import TestCase
 
 
