@@ -87,9 +87,6 @@ class TranslationsMapping(object):
     def __contains__(self, locale):
         return locale in self.manager.option(self.obj, 'locales')
 
-    def format_key(self, locale):
-        return '_translation_%s' % locale
-
     def fetch(self, locale):
         session = sa.orm.object_session(self.obj)
         # If the object has no identity and its not in session or if the object
