@@ -99,6 +99,10 @@ class TranslationsMapping(object):
             )
             self.obj._translations[locale] = locale_obj
             return locale_obj
+        raise UnknownLocaleError(locale, self.obj)
+
+    def __getattr__(self, locale):
+        return self.__getitem__(locale)
 
     @property
     def all(self):

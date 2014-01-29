@@ -32,23 +32,6 @@ class TestTranslatableModel(TestCase):
         assert 'content' in columns
         assert 'description' not in columns
 
-    def test_proxy_contains(self):
-        article = self.Article()
-        article.translations['en']
-        assert 'en' in article.translations
-
-    def test_attribute_accessor(self):
-        assert self.Article.translations.en
-        assert self.Article.translations.fi
-
-    def test_attribute_accessor_for_unknown_locale(self):
-        with raises(UnknownLocaleError):
-            assert self.Article.translations.some_unknown_locale
-
-    def test_proxy_not_contains(self):
-        article = self.Article()
-        assert 'dsadsad' not in article.translations
-
     def test_property_delegators(self):
         article = self.Article()
         article.translations['en']

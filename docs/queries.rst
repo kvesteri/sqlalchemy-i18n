@@ -35,7 +35,7 @@ Joinedload arbitrary translations
 
 
 Joinedload all translations
---------------------------
+---------------------------
 
 ::
 
