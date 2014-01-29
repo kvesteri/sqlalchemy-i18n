@@ -6,6 +6,7 @@ from .builders import (
 )
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from .exc import UnknownLocaleError
 from .utils import leaf_classes, all_translated_columns, is_string
 
 
@@ -14,10 +15,12 @@ class TranslationComparator(RelationshipProperty.Comparator):
     def __getitem__(self, key):
         return getattr(self._parentmapper.class_, '_translation_%s' % key)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, locale):
         class_ = self._parentmapper.class_
-        return getattr(class_, '_translation_%s' % attr)
-
+        try:
+            return getattr(class_, '_translation_%s' % locale)
+        except AttributeError:
+            raise UnknownLocaleError(locale, class_)
 
 
 class TranslationManager(object):

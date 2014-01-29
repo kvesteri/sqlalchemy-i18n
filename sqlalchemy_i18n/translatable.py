@@ -3,11 +3,8 @@ import six
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.util import has_identity
+from .exc import UnknownLocaleError
 from .utils import default_locale, option
-
-
-class UnknownLocaleException(Exception):
-    pass
 
 
 class Translatable(object):
@@ -24,7 +21,7 @@ class Translatable(object):
     @contextmanager
     def force_locale(self, locale):
         if locale not in option(self, 'locales'):
-            raise UnknownLocaleException()
+            raise UnknownLocaleError(locale, self)
         old_forced_locale = self._forced_locale
         self._forced_locale = locale
         yield
