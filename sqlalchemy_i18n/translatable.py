@@ -31,10 +31,7 @@ class Translatable(object):
         locale = self._forced_locale or self.get_locale()
         if locale:
             return locale
-
-        manager = self.__translatable__['manager']
-        if manager.option(self, 'get_locale_fallback'):
-            return default_locale(self)
+        return default_locale(self)
 
     @hybrid_property
     def current_translation(self):
@@ -49,9 +46,7 @@ class Translatable(object):
 
     @current_translation.expression
     def current_translation(cls):
-        manager = cls.__translatable__['manager']
-
-        if manager.option(cls, 'dynamic_source_locale'):
+        if option(cls, 'dynamic_source_locale'):
             return cls._current_translation
 
         locale = six.text_type(
