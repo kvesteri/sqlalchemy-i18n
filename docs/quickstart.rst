@@ -1,10 +1,3 @@
-Installation
-------------
-
-
-    pip install SQLAlchemy-i18n
-
-
 QuickStart
 ----------
 
