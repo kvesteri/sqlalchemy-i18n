@@ -13,9 +13,10 @@ class Translatable(object):
     }
     _forced_locale = None
 
-    def get_locale(self):
+    @hybrid_property
+    def locale(self):
         raise NotImplementedError(
-            'Your translatable model needs to define get_locale method.'
+            'Your translatable model needs to define locale property.'
         )
 
     @contextmanager
@@ -28,7 +29,7 @@ class Translatable(object):
         self._forced_locale = old_forced_locale
 
     def _get_locale(self):
-        locale = self._forced_locale or self.get_locale()
+        locale = self._forced_locale or self.locale
         if locale:
             return locale
         return default_locale(self)
@@ -48,9 +49,7 @@ class Translatable(object):
         if option(cls, 'dynamic_source_locale'):
             return cls._current_translation
 
-        locale = six.text_type(
-            six.get_unbound_function(cls.get_locale)(cls)
-        )
+        locale = six.text_type(cls.locale)
         return getattr(cls, '_translation_%s' % locale)
 
     @hybrid_property

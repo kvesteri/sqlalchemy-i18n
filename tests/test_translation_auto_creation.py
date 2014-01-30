@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_i18n import Translatable, translation_manager
 from tests import TestCase
 
@@ -45,7 +46,8 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
                 'default_locale': 'en'
             }
 
-            def get_locale(self):
+            @hybrid_property
+            def locale(self):
                 return 'en'
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)

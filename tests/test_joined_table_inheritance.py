@@ -17,9 +17,7 @@ class TestJoinedTableInheritance(TestCase):
                 'locales': ['en', 'fi'],
                 'default_locale': 'en'
             }
-
-            def get_locale(self):
-                return 'en'
+            locale = 'en'
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)

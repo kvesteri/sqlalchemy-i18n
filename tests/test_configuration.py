@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_i18n import Translatable
 from tests import TestCase
 
@@ -20,7 +21,8 @@ class TestWithoutBaseClassesOption(TestCase):
                 'polymorphic_on': discriminator,
             }
 
-            def get_locale(self):
+            @hybrid_property
+            def locale(self):
                 pass
 
         self.Article = Article
@@ -46,7 +48,8 @@ class TestGetLocaleFallback(TestCase):
                 'polymorphic_on': discriminator,
             }
 
-            def get_locale(self):
+            @hybrid_property
+            def locale(self):
                 pass
 
         self.Article = Article

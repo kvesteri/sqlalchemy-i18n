@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_i18n import Translatable, make_translatable
 
@@ -64,7 +65,8 @@ class TestCase(object):
                 'default_locale': 'en'
             }
 
-            def get_locale(self):
+            @hybrid_property
+            def locale(self):
                 return 'en'
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
