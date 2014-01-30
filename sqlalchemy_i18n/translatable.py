@@ -29,10 +29,7 @@ class Translatable(object):
         self._forced_locale = old_forced_locale
 
     def _get_locale(self):
-        locale = self._forced_locale or self.locale
-        if locale:
-            return locale
-        return default_locale(self)
+        return self._forced_locale or self.locale
 
     @hybrid_property
     def current_translation(self):
@@ -46,11 +43,7 @@ class Translatable(object):
 
     @current_translation.expression
     def current_translation(cls):
-        if option(cls, 'dynamic_source_locale'):
-            return cls._current_translation
-
-        locale = six.text_type(cls.locale)
-        return getattr(cls, '_translation_%s' % locale)
+        return cls._current_translation
 
     @hybrid_property
     def translations(self):

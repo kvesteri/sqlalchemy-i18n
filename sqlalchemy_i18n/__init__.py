@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-from sqlalchemy.orm.attributes import set_committed_value
 from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager
 from .translatable import Translatable, UnknownLocaleError
@@ -36,22 +35,6 @@ def make_translatable(
     sa.event.listen(
         session, 'before_flush', manager.auto_create_translations
     )
-
-    def load_listener(target, context):
-        if manager.option(target, 'dynamic_source_locale'):
-            key = '_translation_{locale}'.format(locale=target.locale)
-
-            attr = getattr(sa.inspect(target).attrs, key)
-
-            # Check for SQLAlchemy NO_VALUE symbols
-            if not isinstance(attr, int):
-                set_committed_value(
-                    target,
-                    key,
-                    target._current_translation
-                )
-
-    sa.event.listen(mapper, 'load', load_listener)
 
 
 def find_translations(obj, property_name, locale):

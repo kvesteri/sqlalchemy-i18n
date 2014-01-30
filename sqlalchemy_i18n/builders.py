@@ -164,15 +164,4 @@ class TranslationModelBuilder(TranslationBuilder):
         self.model.__translatable__['class'] = self.translation_class
         self.model.__translatable__['manager'] = self.manager
         self.translation_class.__parent_class__ = self.model
-
-        if self.option('dynamic_source_locale'):
-            self.model._current_translation = sa.orm.relationship(
-                self.translation_class,
-                primaryjoin=sa.and_(
-                    self.translation_class.locale == self.model.locale,
-                    self.translation_class.id == self.model.id
-                ),
-                viewonly=True,
-                uselist=False
-            )
         return self.translation_class

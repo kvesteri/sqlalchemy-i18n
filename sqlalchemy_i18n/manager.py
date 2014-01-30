@@ -31,11 +31,9 @@ class TranslationManager(object):
             'locales': [],
             'auto_create_locales': True,
             'base_classes': None,
-            'dynamic_source_locale': False,
             'table_name': '%s_translation',
             'locale_column_name': 'locale',
             'default_locale': 'en',
-            'get_locale_fallback': False,
             'exclude_hybrid_properties': []
         }
 
@@ -113,6 +111,22 @@ class TranslationManager(object):
                 comparator_factory=TranslationComparator,
                 cascade='all, delete-orphan',
                 passive_deletes=True,
+            )
+
+        try:
+            current_locale = model.locale
+        except NotImplementedError:
+            pass
+        else:
+            model._current_translation = sa.orm.relationship(
+                translation_cls,
+                primaryjoin=sa.and_(
+                    model.id == translation_cls.id,
+                    translation_cls.locale == current_locale,
+                ),
+                foreign_keys=[model.id],
+                viewonly=True,
+                uselist=False
             )
 
         setattr(

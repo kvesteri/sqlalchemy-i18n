@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_i18n import Translatable
 from tests import TestCase
 
@@ -26,15 +27,15 @@ class TestDynamicSourceLocale(TestCase):
                 'base_classes': (self.Model, ),
                 'locales': self.locales,
                 'default_locale': 'en',
-                'dynamic_source_locale': True
             }
 
-            def get_locale(self):
-                return self.locale or 'en'
+            @hybrid_property
+            def locale(self):
+                return self._locale or 'en'
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
-            locale = sa.Column(sa.Unicode(10), default=u'en')
+            _locale = sa.Column(sa.Unicode(10), default=u'en')
 
         self.Article = Article
 
