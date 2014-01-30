@@ -27,13 +27,12 @@ In order to make your models use SQLAlchemy-i18n you need two things:
         __translatable__ = {
             'locales': [u'en', u'fi']
         }
+        locale = 'en'  # this defines the default locale
 
         id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
 
         author = sa.Column(sa.Unicode(255))
 
-        def get_locale(self):
-            return 'en'
 
 
     article = Article()

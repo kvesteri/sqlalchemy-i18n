@@ -19,17 +19,21 @@ Example: ::
 Accessing translations
 ----------------------
 
-::
+Dictionary based access::
 
 
-    article = Article()
     article.translations['en'].name = u'Some article'
-    session.add(article)
-    session.commit()
 
 
-Using force_locale
-------------------
+Attribute access::
+
+    article.translations.en.name = u'Some article'
+    article.translations.fi.name = u'Joku artikkeli'
+
+
+
+Locale forcing
+--------------
 
 You can force your models to use custom current locale by using force_locale context managers.
 
@@ -48,7 +52,3 @@ You can force your models to use custom current locale by using force_locale con
     with article.force_locale('fi'):
         article.name  # u'Joku artikkeli'
 
-
-
-Callables as default locale
----------------------------
