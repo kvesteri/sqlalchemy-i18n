@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.util import has_identity
 from .exc import UnknownLocaleError
-from .utils import default_locale, option
+from .utils import option
 
 
 class Translatable(object):

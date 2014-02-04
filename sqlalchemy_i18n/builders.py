@@ -1,7 +1,5 @@
-from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_utils.functions import primary_keys, declarative_base
 
 
 class ImproperlyConfigured(Exception):
@@ -9,9 +7,10 @@ class ImproperlyConfigured(Exception):
 
 
 class TranslationBuilder(object):
-    def __init__(self, manager, model):
+    def __init__(self, manager, translation_model):
         self.manager = manager
-        self.model = model
+        self.translation_model = translation_model
+        self.model = self.translation_model.__parent_class__
 
     def option(self, name):
         try:
@@ -70,98 +69,67 @@ class HybridPropertyBuilder(TranslationBuilder):
         )
 
     def __call__(self):
-        for column in self.model.__translated_columns__:
+        for column in self.translation_model.__table__.c:
             exclude = self.manager.option(
                 self.model, 'exclude_hybrid_properties'
             )
 
-            if column.key in exclude:
+            if column.key in exclude or column.primary_key:
                 continue
 
             self.detect_collisions(column.key)
             self.assign_attr_getter_setters(column.key)
 
 
-class TranslationModelBuilder(TranslationBuilder):
-    @property
-    def table_name(self):
-        return self.option('table_name') % self.model.__tablename__
+# class TranslationModelBuilder(TranslationBuilder):
+#     def build_foreign_key(self):
+#         names = [column.name for column in primary_keys(self.model)]
+#         return sa.schema.ForeignKeyConstraint(
+#             names,
+#             [
+#                 '%s.%s' % (self.model.__tablename__, name)
+#                 for name in names
+#             ],
+#             ondelete='CASCADE'
+#         )
 
-    def build_reflected_primary_keys(self):
-        columns = []
-        for column in primary_keys(self.model):
-            # Make a copy of the column so that it does not point to wrong
-            # table.
-            column_copy = column.copy()
-            # Remove unique constraints
-            column_copy.unique = False
-            columns.append(column_copy)
-        return columns
+#     @property
+#     def base_classes(self):
+#         parent = self.manager.closest_generated_parent(self.model)
+#         parent = (parent, ) if parent else None
+#         return (
+#             parent
+#             or self.option('base_classes')
+#             or (declarative_base(self.model), )
+#         )
 
-    def build_foreign_key(self):
-        names = [column.name for column in primary_keys(self.model)]
-        return sa.schema.ForeignKeyConstraint(
-            names,
-            [
-                '%s.%s' % (self.model.__tablename__, name)
-                for name in names
-            ],
-            ondelete='CASCADE'
-        )
+#     def build_model(self):
+#         data = {}
+#         if not self.manager.closest_generated_parent(self.model):
+#             data.update({
+#                 '__table_args__': (self.build_foreign_key(), ),
+#                 '__tablename__': self.table_name,
+#             })
+#         data.update(self.columns)
+#         return type(
+#             '%sTranslation' % self.model.__name__,
+#             self.base_classes,
+#             data
+#         )
 
-    def build_locale_column(self):
-        return sa.Column(
-            self.option('locale_column_name'),
-            sa.String(10),
-            primary_key=True
-        )
+#     def __call__(self):
+#         # translatable attributes need to be copied for each child class,
+#         # otherwise each child class would share the same __translatable__
+#         # option dict
+#         if not self.option('locales'):
+#             raise ImproperlyConfigured(
+#                 'Either the translation manager or the model class must define'
+#                 ' available locales as a configuration option.'
+#             )
 
-    @property
-    def columns(self):
-        columns = []
-        if not self.manager.closest_generated_parent(self.model):
-            columns.extend(self.build_reflected_primary_keys())
-            columns.append(self.build_locale_column())
-        columns.extend(self.model.__translated_columns__)
-        return dict([(column.name, column) for column in columns])
-
-    @property
-    def base_classes(self):
-        parent = self.manager.closest_generated_parent(self.model)
-        parent = (parent, ) if parent else None
-        return (
-            parent
-            or self.option('base_classes')
-            or (declarative_base(self.model), )
-        )
-
-    def build_model(self):
-        data = {}
-        if not self.manager.closest_generated_parent(self.model):
-            data.update({
-                '__table_args__': (self.build_foreign_key(), ),
-                '__tablename__': self.table_name,
-            })
-        data.update(self.columns)
-        return type(
-            '%sTranslation' % self.model.__name__,
-            self.base_classes,
-            data
-        )
-
-    def __call__(self):
-        # translatable attributes need to be copied for each child class,
-        # otherwise each child class would share the same __translatable__
-        # option dict
-        if not self.option('locales'):
-            raise ImproperlyConfigured(
-                'Either the translation manager or the model class must define'
-                ' available locales as a configuration option.'
-            )
-
-        self.model.__translatable__ = copy(self.model.__translatable__)
-        self.translation_class = self.build_model()
-        self.model.__translatable__['class'] = self.translation_class
-        self.model.__translatable__['manager'] = self.manager
-        self.translation_class.__parent_class__ = self.model
-        return self.translation_class
+#         self.model.__translatable__ = copy(self.model.__translatable__)
+#         self.translation_class = self.build_model()
+#         self.model.__translatable__['class'] = self.translation_class
+#         self.model.__translatable__['manager'] = self.manager
+#         self.translation_class.__parent_class__ = self.model
+#         return self.translation_class

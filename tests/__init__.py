@@ -6,7 +6,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_i18n import Translatable, make_translatable
+from sqlalchemy_i18n import Translatable, make_translatable, translation_base
 
 
 @sa.event.listens_for(Engine, 'before_cursor_execute')
@@ -55,12 +55,7 @@ class TestCase(object):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255)),
-                sa.Column('content', sa.UnicodeText)
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
                 'locales': self.locales,
                 'default_locale': 'en'
             }
@@ -73,7 +68,16 @@ class TestCase(object):
             description = sa.Column(sa.UnicodeText)
 
             def __repr__(self):
-                return 'Article(id=%d)' % self.id
+                return 'Article(id=%r)' % self.id
+
+
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
+
+            content = sa.Column(sa.UnicodeText)
+
 
         self.Article = Article
 

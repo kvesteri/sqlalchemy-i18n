@@ -1,13 +1,11 @@
-from copy import copy
 import sqlalchemy as sa
-from .translatable import Translatable
-from .builders import (
-    TranslationModelBuilder, HybridPropertyBuilder, ImproperlyConfigured
-)
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy_utils.functions import declarative_base, primary_keys
+
+from .builders import HybridPropertyBuilder
 from .exc import UnknownLocaleError
-from .utils import leaf_classes, all_translated_columns, is_string
+from .utils import all_translated_columns, is_string
 
 
 
@@ -21,6 +19,47 @@ class TranslationComparator(RelationshipProperty.Comparator):
             return getattr(class_, '_translation_%s' % locale)
         except AttributeError:
             raise UnknownLocaleError(locale, class_)
+
+
+class_map = {}
+
+
+class BaseTranslationMixin(object):
+    pass
+
+
+def translation_base(parent_cls):
+    class TranslationMixin(
+        declarative_base(parent_cls),
+        BaseTranslationMixin
+    ):
+        __abstract__ = True
+        __parent_class__ = parent_cls
+
+    for column in parent_cls.__table__.c:
+        if column.primary_key:
+            setattr(
+                TranslationMixin,
+                column.key,
+                column.copy()
+            )
+
+    TranslationMixin.locale = sa.Column(
+        sa.String(10), primary_key=True
+    )
+    names = [column.name for column in primary_keys(parent_cls)]
+    fk = sa.schema.ForeignKeyConstraint(
+        names,
+        [
+            '%s.%s' % (parent_cls.__tablename__, name)
+            for name in names
+        ],
+        ondelete='CASCADE'
+    )
+
+    TranslationMixin.__table_args__ = (fk, )
+
+    return TranslationMixin
 
 
 class TranslationManager(object):
@@ -38,26 +77,25 @@ class TranslationManager(object):
         }
 
     def instrument_translatable_classes(self, mapper, cls):
-        if issubclass(cls, Translatable):
-            if (not cls.__translatable__.get('class')
-                    and cls not in self.pending_classes):
-                self.pending_classes.append(cls)
+        if issubclass(cls, BaseTranslationMixin):
+            self.pending_classes.append(cls)
 
     def configure_translatable_classes(self):
-        try:
-            for cls in self.pending_classes:
-                builder = TranslationModelBuilder(self, cls)
-                self.class_map[cls] = builder()
-                builder = HybridPropertyBuilder(self, cls)
-                builder()
+        for cls in self.pending_classes:
+            self.class_map[cls.__parent_class__] = cls
+            parent_cls = cls.__parent_class__
+            parent_cls.__translatable__['manager'] = self
+            parent_cls.__translatable__['class'] = cls
 
-            pending_classes_copy = copy(self.pending_classes)
-            self.pending_classes = []
-            for cls in leaf_classes(pending_classes_copy):
-                self.build_relationships(cls)
-        except ImproperlyConfigured:
-            self.pending_classes = []
-            raise
+            builder = HybridPropertyBuilder(self, cls)
+            builder()
+
+            self.build_relationships(cls)
+        self.pending_classes = []
+        # pending_classes_copy = copy(self.pending_classes)
+        # self.pending_classes = []
+        # for cls in leaf_classes(pending_classes_copy):
+        #     self.build_relationships(cls)
 
     def closest_generated_parent(self, model):
         for class_ in model.__bases__:
@@ -79,13 +117,13 @@ class TranslationManager(object):
         except (AttributeError, KeyError):
             return self.options[name]
 
-    def build_relationships(self, model):
+    def build_relationships(self, translation_cls):
         """
         Build translation relationships for given SQLAlchemy declarative model.
 
         :param model: SQLAlchemy declarative model
         """
-        translation_cls = model.__translatable__['class']
+        model = translation_cls.__parent_class__
         for locale in self.option(model, 'locales'):
             setattr(
                 model,
