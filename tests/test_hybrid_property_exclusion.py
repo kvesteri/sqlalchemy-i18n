@@ -13,7 +13,6 @@ class TestHybridPropertyExclusion(TestCase):
             __translatable__ = {
                 'locales': ['fi', 'en'],
                 'auto_create_locales': True,
-                'default_locale': lambda self: self.locale or 'en',
                 'exclude_hybrid_properties': ['word_count']
             }
 

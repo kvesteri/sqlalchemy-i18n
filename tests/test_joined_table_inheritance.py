@@ -10,7 +10,6 @@ class TestJoinedTableInheritance(TestCase):
             __tablename__ = 'text_item'
             __translatable__ = {
                 'locales': ['en', 'fi'],
-                'default_locale': 'en'
             }
             locale = 'en'
 

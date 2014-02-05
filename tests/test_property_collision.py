@@ -14,10 +14,8 @@ class TestPropertyCollision(TestCase):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
             __translatable__ = {
-                'base_classes': (self.Model, ),
                 'locales': ['fi', 'en'],
                 'auto_create_locales': True,
-                'default_locale': lambda self: self.locale or 'en'
             }
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)

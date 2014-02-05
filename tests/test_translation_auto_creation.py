@@ -38,8 +38,7 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
             __tablename__ = 'article'
             __translatable__ = {
                 'auto_created_locales': True,
-                'locales': ['en', 'fi'],
-                'default_locale': 'en'
+                'locales': ['en', 'fi']
             }
 
             @hybrid_property

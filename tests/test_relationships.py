@@ -12,8 +12,6 @@ class TestRelationships(TestCase):
 
         class Category(self.Model, Translatable):
             __tablename__ = 'category'
-            __translatable__ = {}
-
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             article_id = sa.Column(sa.Integer, sa.ForeignKey(Article.id))
             article = sa.orm.relationship(

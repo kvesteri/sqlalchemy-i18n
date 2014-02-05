@@ -20,8 +20,7 @@ class TestDynamicSourceLocale(TestCase):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
             __translatable__ = {
-                'locales': self.locales,
-                'default_locale': 'en',
+                'locales': self.locales
             }
 
             @hybrid_property

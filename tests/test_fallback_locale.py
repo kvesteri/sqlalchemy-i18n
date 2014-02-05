@@ -3,7 +3,7 @@ from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
 
 
-class DefaultLocaleTestCase(TestCase):
+class LocaleFallbackTestCase(TestCase):
     def test_hybrid_properties_support_callable_fallback_locales(self):
         article = self.Article(locale=u'en')
         article.name = u'Some article'
@@ -14,7 +14,7 @@ class DefaultLocaleTestCase(TestCase):
         article.name
 
 
-class TestDefaultLocaleAsCallable(DefaultLocaleTestCase):
+class TestDefaultLocaleAsCallable(LocaleFallbackTestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
@@ -39,7 +39,7 @@ class TestDefaultLocaleAsCallable(DefaultLocaleTestCase):
         self.Article = Article
 
 
-class TestWithoutClassDefaultLocale(DefaultLocaleTestCase):
+class TestWithoutClassDefaultLocale(LocaleFallbackTestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'

@@ -42,9 +42,6 @@ class TestCurrentTranslationWithLocaleObject(TestCase):
 
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translatable__ = {
-                'default_locale': 'en'
-            }
 
             @hybrid_property
             def locale(self):
