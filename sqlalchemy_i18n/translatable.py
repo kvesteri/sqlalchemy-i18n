@@ -108,6 +108,13 @@ class TranslationsMapping(object):
     def __getattr__(self, locale):
         return self.__getitem__(locale)
 
+    # Added for py2.6 compatibility
+    def __length_hint__(self):
+        return len(self)
+
+    def __len__(self):
+        return len(self.manager.option(self.obj, 'locales'))
+
     @property
     def all(self):
         return list(self.values())

@@ -28,7 +28,7 @@ def make_translatable(
     manager.options.update(options)
 
     sa.event.listen(
-        mapper, 'instrument_class', manager.instrument_translatable_classes
+        mapper, 'instrument_class', manager.instrument_translation_classes
     )
     sa.event.listen(
         mapper, 'after_configured', manager.configure_translatable_classes
