@@ -79,7 +79,15 @@ class TranslationManager(object):
             'exclude_hybrid_properties': []
         }
 
-    def instrument_translatable_classes(self, mapper, cls):
+    def instrument_translation_classes(self, mapper, cls):
+        """
+        SQLAlchemy class instrumentation listener that adds all translation
+        classes to pending classes list. These classes are later on processed
+        by configure_translatable_classes listener.
+
+        :param mapper: SQLAlchemy mapper
+        :param cls: SQLAlchemy declarative class
+        """
         if issubclass(cls, BaseTranslationMixin):
             self.pending_classes.append(cls)
 
