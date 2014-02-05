@@ -29,6 +29,8 @@ class TestJoinedTableInheritance(TestCase):
 
             content = sa.Column(sa.UnicodeText)
 
+            caption = sa.Column(sa.UnicodeText)
+
         class Article(TextItem):
             __tablename__ = 'article'
             id = sa.Column(
@@ -36,33 +38,6 @@ class TestJoinedTableInheritance(TestCase):
             )
             __mapper_args__ = {'polymorphic_identity': u'article'}
             category = sa.Unicode(255)
-
-        class ArticleTranslation(TextItemTranslation):
-            __tablename__ = 'article_translation'
-
-            id = sa.Column(
-                sa.Integer,
-                primary_key=True
-            )
-
-            locale = sa.Column(
-                sa.String(10),
-                primary_key=True
-            )
-
-            __table_args__ = (
-                sa.ForeignKeyConstraint(
-                    ['id', 'locale'],
-                    [
-                        'text_item_translation.id',
-                        'text_item_translation.locale'
-                    ],
-                    ondelete='CASCADE'
-                ),
-            )
-
-            caption = sa.Column(sa.UnicodeText)
-
 
         self.TextItem = TextItem
         self.Article = Article
@@ -117,9 +92,3 @@ class TestJoinedTableInheritance(TestCase):
         assert article.translations['en'].name == u'some other thing'
         article.caption = u'some caption'
         assert article.current_translation.caption == u'some caption'
-
-    def test_subclass_properties_not_assigned_to_parent(self):
-        textitem = self.TextItem()
-
-        with raises(AttributeError):
-            textitem.caption
