@@ -17,17 +17,6 @@ def default_locale(obj):
     return locale
 
 
-def leaf_classes(classes):
-    for cls in classes:
-        found = False
-        for other_cls in classes:
-            if issubclass(other_cls, cls) and other_cls is not cls:
-                found = True
-                break
-        if not found:
-            yield cls
-
-
 def parent_classes(cls):
     """
     Simple recursive function for listing the parent classes of given class.

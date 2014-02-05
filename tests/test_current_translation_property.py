@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_i18n import Translatable
+from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
 
 
@@ -42,13 +42,7 @@ class TestCurrentTranslationWithLocaleObject(TestCase):
 
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255), nullable=False),
-                sa.Column('content', sa.UnicodeText)
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
-                'locales': ['en', 'fi'],
                 'default_locale': 'en'
             }
 
@@ -58,6 +52,14 @@ class TestCurrentTranslationWithLocaleObject(TestCase):
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
+
+
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
+
+            content = sa.Column(sa.UnicodeText)
 
         self.Article = Article
 

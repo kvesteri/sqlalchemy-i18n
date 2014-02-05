@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy_i18n import Translatable
+from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
 
 
@@ -18,11 +18,7 @@ class TestDefaultLocaleAsCallable(DefaultLocaleTestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255))
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
                 'locales': ['fi', 'en'],
                 'auto_create_locales': True,
                 'default_locale': lambda self: self.locale or 'en'
@@ -35,6 +31,11 @@ class TestDefaultLocaleAsCallable(DefaultLocaleTestCase):
             def get_locale(self):
                 return 'en'
 
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
+
         self.Article = Article
 
 
@@ -42,11 +43,7 @@ class TestWithoutClassDefaultLocale(DefaultLocaleTestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255))
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
                 'locales': ['fi', 'en'],
                 'auto_create_locales': True,
             }
@@ -57,5 +54,11 @@ class TestWithoutClassDefaultLocale(DefaultLocaleTestCase):
 
             def get_locale(self):
                 return 'en'
+
+
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
 
         self.Article = Article

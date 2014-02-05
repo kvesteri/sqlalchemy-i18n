@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm.relationships import RelationshipProperty
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
 from sqlalchemy_utils.functions import declarative_base, primary_keys
 
 from .builders import HybridPropertyBuilder
@@ -36,6 +37,22 @@ def translation_base(parent_cls):
         __abstract__ = True
         __parent_class__ = parent_cls
 
+        @declared_attr
+        def __table_args__(cls):
+            if has_inherited_table(cls):
+                return tuple()
+            else:
+                names = [column.name for column in primary_keys(parent_cls)]
+
+                return (sa.schema.ForeignKeyConstraint(
+                    names,
+                    [
+                        '%s.%s' % (parent_cls.__tablename__, name)
+                        for name in names
+                    ],
+                    ondelete='CASCADE'
+                ), )
+
     for column in parent_cls.__table__.c:
         if column.primary_key:
             setattr(
@@ -47,17 +64,6 @@ def translation_base(parent_cls):
     TranslationMixin.locale = sa.Column(
         sa.String(10), primary_key=True
     )
-    names = [column.name for column in primary_keys(parent_cls)]
-    fk = sa.schema.ForeignKeyConstraint(
-        names,
-        [
-            '%s.%s' % (parent_cls.__tablename__, name)
-            for name in names
-        ],
-        ondelete='CASCADE'
-    )
-
-    TranslationMixin.__table_args__ = (fk, )
 
     return TranslationMixin
 
@@ -69,9 +75,6 @@ class TranslationManager(object):
         self.options = {
             'locales': [],
             'auto_create_locales': True,
-            'base_classes': None,
-            'table_name': '%s_translation',
-            'locale_column_name': 'locale',
             'default_locale': 'en',
             'exclude_hybrid_properties': []
         }
@@ -92,15 +95,6 @@ class TranslationManager(object):
 
             self.build_relationships(cls)
         self.pending_classes = []
-        # pending_classes_copy = copy(self.pending_classes)
-        # self.pending_classes = []
-        # for cls in leaf_classes(pending_classes_copy):
-        #     self.build_relationships(cls)
-
-    def closest_generated_parent(self, model):
-        for class_ in model.__bases__:
-            if class_ in self.class_map:
-                return self.class_map[class_]
 
     def option(self, model, name):
         """
@@ -125,9 +119,12 @@ class TranslationManager(object):
         """
         model = translation_cls.__parent_class__
         for locale in self.option(model, 'locales'):
+            key = '_translation_%s' % locale
+            if key in model.__dict__:
+                continue
             setattr(
                 model,
-                '_translation_%s' % locale,
+                key,
                 sa.orm.relationship(
                     translation_cls,
                     primaryjoin=sa.and_(
@@ -156,26 +153,28 @@ class TranslationManager(object):
         except NotImplementedError:
             pass
         else:
-            model._current_translation = sa.orm.relationship(
-                translation_cls,
-                primaryjoin=sa.and_(
-                    model.id == translation_cls.id,
-                    translation_cls.locale == current_locale,
-                ),
-                foreign_keys=[model.id],
-                viewonly=True,
-                uselist=False
-            )
+            if '_current_translation' not in model.__dict__:
+                model._current_translation = sa.orm.relationship(
+                    translation_cls,
+                    primaryjoin=sa.and_(
+                        model.id == translation_cls.id,
+                        translation_cls.locale == current_locale,
+                    ),
+                    foreign_keys=[model.id],
+                    viewonly=True,
+                    uselist=False
+                )
 
-        setattr(
-            translation_cls,
-            'translation_parent',
-            sa.orm.relationship(
-                model,
-                uselist=False,
-                viewonly=True
+        if 'translation_parent' not in translation_cls.__dict__:
+            setattr(
+                translation_cls,
+                'translation_parent',
+                sa.orm.relationship(
+                    model,
+                    uselist=False,
+                    viewonly=True
+                )
             )
-        )
 
     def set_not_nullables_to_empty_strings(self, locale, obj):
         for column in all_translated_columns(obj.__class__):

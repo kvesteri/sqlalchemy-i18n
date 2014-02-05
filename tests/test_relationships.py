@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy_i18n import Translatable
+from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
 
 
@@ -12,12 +12,7 @@ class TestRelationships(TestCase):
 
         class Category(self.Model, Translatable):
             __tablename__ = 'category'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255)),
-            ]
-            __translatable__ = {
-                'base_classes': (self.Model, )
-            }
+            __translatable__ = {}
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             article_id = sa.Column(sa.Integer, sa.ForeignKey(Article.id))
@@ -29,6 +24,11 @@ class TestRelationships(TestCase):
                     cascade='all, delete-orphan'
                 )
             )
+
+        class CategoryTranslation(translation_base(Category)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
 
         self.Article = Article
         self.Category = Category

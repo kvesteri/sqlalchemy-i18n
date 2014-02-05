@@ -1,6 +1,6 @@
 from pytest import raises
 import sqlalchemy as sa
-from sqlalchemy_i18n import Translatable
+from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
 
 
@@ -8,12 +8,7 @@ class TestJoinedTableInheritance(TestCase):
     def create_models(self):
         class TextItem(self.Model, Translatable):
             __tablename__ = 'text_item'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255)),
-                sa.Column('content', sa.UnicodeText)
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
                 'locales': ['en', 'fi'],
                 'default_locale': 'en'
             }
@@ -28,16 +23,46 @@ class TestJoinedTableInheritance(TestCase):
                 'polymorphic_on': discriminator,
             }
 
+        class TextItemTranslation(translation_base(TextItem)):
+            __tablename__ = 'text_item_translation'
+            name = sa.Column(sa.Unicode(255))
+
+            content = sa.Column(sa.UnicodeText)
+
         class Article(TextItem):
             __tablename__ = 'article'
             id = sa.Column(
                 sa.Integer, sa.ForeignKey(TextItem.id), primary_key=True
             )
-            __translated_columns__ = [
-                sa.Column('caption', sa.UnicodeText)
-            ]
             __mapper_args__ = {'polymorphic_identity': u'article'}
             category = sa.Unicode(255)
+
+        class ArticleTranslation(TextItemTranslation):
+            __tablename__ = 'article_translation'
+
+            id = sa.Column(
+                sa.Integer,
+                primary_key=True
+            )
+
+            locale = sa.Column(
+                sa.String(10),
+                primary_key=True
+            )
+
+            __table_args__ = (
+                sa.ForeignKeyConstraint(
+                    ['id', 'locale'],
+                    [
+                        'text_item_translation.id',
+                        'text_item_translation.locale'
+                    ],
+                    ondelete='CASCADE'
+                ),
+            )
+
+            caption = sa.Column(sa.UnicodeText)
+
 
         self.TextItem = TextItem
         self.Article = Article
@@ -59,9 +84,6 @@ class TestJoinedTableInheritance(TestCase):
         textitem = self.TextItem()
         class_ = textitem.__translatable__['class']
         assert class_.__name__ == 'TextItemTranslation'
-        article = self.Article()
-        class_ = article.__translatable__['class']
-        assert class_.__name__ == 'ArticleTranslation'
 
     def test_inherits_child_properties(self):
         assert self.Article.caption

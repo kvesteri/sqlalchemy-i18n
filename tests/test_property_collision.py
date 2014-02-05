@@ -1,6 +1,8 @@
 from pytest import raises
 import sqlalchemy as sa
-from sqlalchemy_i18n import Translatable, ImproperlyConfigured
+from sqlalchemy_i18n import (
+    Translatable, translation_base, ImproperlyConfigured
+)
 from tests import TestCase
 
 
@@ -11,9 +13,6 @@ class TestPropertyCollision(TestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255))
-            ]
             __translatable__ = {
                 'base_classes': (self.Model, ),
                 'locales': ['fi', 'en'],
@@ -34,6 +33,10 @@ class TestPropertyCollision(TestCase):
 
     def test_raises_exception(self):
         with raises(ImproperlyConfigured):
+            class ArticleTranslation(translation_base(self.Article)):
+                __tablename__ = 'article_translation'
+
+                name = sa.Column(sa.Unicode(255))
             self.Article()
 
 

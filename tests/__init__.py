@@ -6,7 +6,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_i18n import Translatable, make_translatable, translation_base
+from sqlalchemy_i18n import (
+    Translatable, translation_manager, make_translatable, translation_base
+)
 
 
 @sa.event.listens_for(Engine, 'before_cursor_execute')
@@ -47,6 +49,7 @@ class TestCase(object):
         self.create_session()
 
     def teardown_method(self, method):
+        translation_manager.pending_classes = []
         self.session.close_all()
         self.Model.metadata.drop_all(self.connection)
         self.connection.close()
@@ -70,14 +73,12 @@ class TestCase(object):
             def __repr__(self):
                 return 'Article(id=%r)' % self.id
 
-
         class ArticleTranslation(translation_base(Article)):
             __tablename__ = 'article_translation'
 
             name = sa.Column(sa.Unicode(255))
 
             content = sa.Column(sa.UnicodeText)
-
 
         self.Article = Article
 
