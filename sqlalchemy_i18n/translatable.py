@@ -9,7 +9,7 @@ from .utils import option
 
 class Translatable(object):
     __translatable__ = {
-        'default_locale': 'en'
+        'fallback_locale': 'en'
     }
     _forced_locale = None
 

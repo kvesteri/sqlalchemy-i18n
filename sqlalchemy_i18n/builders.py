@@ -24,7 +24,7 @@ class HybridPropertyBuilder(object):
             if value:
                 return value
 
-            default_locale = self.manager.option(obj, 'default_locale')
+            default_locale = self.manager.option(obj, 'fallback_locale')
             if callable(default_locale):
                 default_locale = default_locale(obj)
             return getattr(

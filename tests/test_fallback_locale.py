@@ -4,7 +4,7 @@ from tests import TestCase
 
 
 class DefaultLocaleTestCase(TestCase):
-    def test_hybrid_properties_support_callable_default_locales(self):
+    def test_hybrid_properties_support_callable_fallback_locales(self):
         article = self.Article(locale=u'en')
         article.name = u'Some article'
         assert article.name == u'Some article'
@@ -21,7 +21,7 @@ class TestDefaultLocaleAsCallable(DefaultLocaleTestCase):
             __translatable__ = {
                 'locales': ['fi', 'en'],
                 'auto_create_locales': True,
-                'default_locale': lambda self: self.locale or 'en'
+                'fallback_locale': lambda self: self.locale or 'en'
             }
 
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)

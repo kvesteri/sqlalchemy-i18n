@@ -75,7 +75,7 @@ class TranslationManager(object):
         self.options = {
             'locales': [],
             'auto_create_locales': True,
-            'default_locale': 'en',
+            'fallback_locale': 'en',
             'exclude_hybrid_properties': []
         }
 
@@ -92,6 +92,11 @@ class TranslationManager(object):
             self.pending_classes.append(cls)
 
     def configure_translatable_classes(self):
+        """
+        This SQLAlchemy after_configured listener configures all translation
+        classes, builds hybrid properties for translation parent classes and
+        finally builds relationships between translation and parent classes.
+        """
         for cls in self.pending_classes:
             self.class_map[cls.__parent_class__] = cls
             parent_cls = cls.__parent_class__
