@@ -29,12 +29,9 @@ def parent_classes(cls):
 
 
 def all_translated_columns(model):
-    columns = set()
-    for cls in parent_classes(model) + [model]:
-        if hasattr(cls, '__translated_columns__'):
-            for column in cls.__translated_columns__:
-                columns.add(column)
-    return columns
+    for column in sa.inspect(model.__translatable__['class']).columns:
+        if not column.primary_key:
+            yield column
 
 
 def is_string(type_):

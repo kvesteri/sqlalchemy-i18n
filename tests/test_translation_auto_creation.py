@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_i18n import Translatable, translation_manager
+from sqlalchemy_i18n import Translatable, translation_manager, translation_base
 from tests import TestCase
 
 
@@ -36,12 +36,8 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
-            __translated_columns__ = [
-                sa.Column('name', sa.Unicode(255), nullable=False),
-                sa.Column('content', sa.UnicodeText)
-            ]
             __translatable__ = {
-                'base_classes': (self.Model, ),
+                'auto_created_locales': True,
                 'locales': ['en', 'fi'],
                 'default_locale': 'en'
             }
@@ -60,13 +56,19 @@ class TestTranslationAutoCreationWithNonNullables(TestCase):
 
         class ExtendedArticle(Article):
             __tablename__ = 'extended_article'
-            __translated_columns__ = [
-                sa.Column('content2', sa.UnicodeText, nullable=False)
-            ]
             __mapper_args__ = {'polymorphic_identity': u'extended'}
             id = sa.Column(
                 sa.Integer, sa.ForeignKey(Article.id), primary_key=True
             )
+
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255), nullable=False)
+
+            content = sa.Column(sa.UnicodeText)
+
+            content2 = sa.Column(sa.UnicodeText)
 
         self.Article = Article
         self.ExtendedArticle = ExtendedArticle

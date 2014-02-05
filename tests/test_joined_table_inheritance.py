@@ -95,7 +95,7 @@ class TestJoinedTableInheritance(TestCase):
 
     def test_translated_columns(self):
         article = self.Article()
-        columns = article.__translatable__['class'].__table__.c
+        columns = sa.inspect(article.__translatable__['class']).columns
         assert 'caption' in columns
         assert 'name' in columns
         assert 'content' in columns

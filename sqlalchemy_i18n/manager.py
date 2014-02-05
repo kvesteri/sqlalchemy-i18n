@@ -205,11 +205,10 @@ class TranslationManager(object):
             session.add(obj)
 
     def auto_create_translations(self, session, flush_context, instances):
-        if not self.options['auto_create_locales']:
-            return
-        for obj in session.new:
-            if hasattr(obj, '__translatable__'):
-                self.create_missing_locales(obj)
+        if self.options['auto_create_locales']:
+            for obj in session.new:
+                if hasattr(obj, '__translatable__'):
+                    self.create_missing_locales(obj)
 
 
 translation_manager = TranslationManager()
