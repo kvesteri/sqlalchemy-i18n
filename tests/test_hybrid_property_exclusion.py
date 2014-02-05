@@ -22,9 +22,6 @@ class TestHybridPropertyExclusion(TestCase):
 
             locale = sa.Column(sa.Unicode(255), default=u'en')
 
-            def get_locale(self):
-                return 'en'
-
         class ArticleTranslation(translation_base(Article)):
             __tablename__ = 'article_translation'
 
