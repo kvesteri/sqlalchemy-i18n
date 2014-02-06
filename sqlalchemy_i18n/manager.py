@@ -1,25 +1,9 @@
 import sqlalchemy as sa
-from sqlalchemy.orm.relationships import RelationshipProperty
-from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
 from sqlalchemy_utils.functions import declarative_base, primary_keys
 
-from .builders import HybridPropertyBuilder
-from .exc import UnknownLocaleError
+from .builders import HybridPropertyBuilder, RelationshipBuilder
 from .utils import all_translated_columns, is_string
-
-
-
-class TranslationComparator(RelationshipProperty.Comparator):
-    def __getitem__(self, key):
-        return getattr(self._parentmapper.class_, '_translation_%s' % key)
-
-    def __getattr__(self, locale):
-        class_ = self._parentmapper.class_
-        try:
-            return getattr(class_, '_translation_%s' % locale)
-        except AttributeError:
-            raise UnknownLocaleError(locale, class_)
 
 
 class_map = {}
@@ -103,10 +87,9 @@ class TranslationManager(object):
             parent_cls.__translatable__['manager'] = self
             parent_cls.__translatable__['class'] = cls
 
-            builder = HybridPropertyBuilder(self, cls)
-            builder()
+            HybridPropertyBuilder(self, cls)()
+            RelationshipBuilder(cls)()
 
-            self.build_relationships(cls)
         self.pending_classes = []
 
     def option(self, model, name):
@@ -123,71 +106,6 @@ class TranslationManager(object):
             return model.__translatable__[name]
         except (AttributeError, KeyError):
             return self.options[name]
-
-    def build_relationships(self, translation_cls):
-        """
-        Build translation relationships for given SQLAlchemy declarative model.
-
-        :param model: SQLAlchemy declarative model
-        """
-        model = translation_cls.__parent_class__
-        for locale in self.option(model, 'locales'):
-            key = '_translation_%s' % locale
-            if key in model.__dict__:
-                continue
-            setattr(
-                model,
-                key,
-                sa.orm.relationship(
-                    translation_cls,
-                    primaryjoin=sa.and_(
-                        model.id == translation_cls.id,
-                        translation_cls.locale == locale
-                    ),
-                    foreign_keys=[model.id],
-                    uselist=False,
-                    viewonly=True
-                )
-            )
-
-        if not hasattr(model, '_translations'):
-            model._translations = sa.orm.relationship(
-                translation_cls,
-                primaryjoin=model.id == translation_cls.id,
-                foreign_keys=[translation_cls.id],
-                collection_class=attribute_mapped_collection('locale'),
-                comparator_factory=TranslationComparator,
-                cascade='all, delete-orphan',
-                passive_deletes=True,
-            )
-
-        try:
-            current_locale = model.locale
-        except NotImplementedError:
-            pass
-        else:
-            if '_current_translation' not in model.__dict__:
-                model._current_translation = sa.orm.relationship(
-                    translation_cls,
-                    primaryjoin=sa.and_(
-                        model.id == translation_cls.id,
-                        translation_cls.locale == current_locale,
-                    ),
-                    foreign_keys=[model.id],
-                    viewonly=True,
-                    uselist=False
-                )
-
-        if 'translation_parent' not in translation_cls.__dict__:
-            setattr(
-                translation_cls,
-                'translation_parent',
-                sa.orm.relationship(
-                    model,
-                    uselist=False,
-                    viewonly=True
-                )
-            )
 
     def set_not_nullables_to_empty_strings(self, locale, obj):
         for column in all_translated_columns(obj.__class__):

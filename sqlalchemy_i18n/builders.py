@@ -1,7 +1,10 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
+from .comparators import TranslationComparator
 from .exc import ImproperlyConfigured
+from .utils import option
 
 
 
@@ -90,3 +93,79 @@ class HybridPropertyBuilder(object):
 
             self.detect_collisions(column.key)
             self.generate_hybrid(column.key)
+
+
+
+class RelationshipBuilder(object):
+    def __init__(self, translation_cls):
+        self.translation_cls = translation_cls
+        self.parent_cls = self.translation_cls.__parent_class__
+
+    def assign_single_translations(self):
+        for locale in option(self.parent_cls, 'locales'):
+            key = '_translation_%s' % locale
+            if key in self.parent_cls.__dict__:
+                continue
+            setattr(
+                self.parent_cls,
+                key,
+                sa.orm.relationship(
+                    self.translation_cls,
+                    primaryjoin=sa.and_(
+                        self.parent_cls.id == self.translation_cls.id,
+                        self.translation_cls.locale == locale
+                    ),
+                    foreign_keys=[self.parent_cls.id],
+                    uselist=False,
+                    viewonly=True
+                )
+            )
+
+    def assign_current_translation(self):
+        try:
+            current_locale = self.parent_cls.locale
+        except NotImplementedError:
+            pass
+        else:
+            if '_current_translation' not in self.parent_cls.__dict__:
+                self.parent_cls._current_translation = sa.orm.relationship(
+                    self.translation_cls,
+                    primaryjoin=sa.and_(
+                        self.parent_cls.id == self.translation_cls.id,
+                        self.translation_cls.locale == current_locale,
+                    ),
+                    foreign_keys=[self.parent_cls.id],
+                    viewonly=True,
+                    uselist=False
+                )
+
+    def assign_translations(self):
+        if not hasattr(self.parent_cls, '_translations'):
+            self.parent_cls._translations = sa.orm.relationship(
+                self.translation_cls,
+                primaryjoin=self.parent_cls.id == self.translation_cls.id,
+                foreign_keys=[self.translation_cls.id],
+                collection_class=attribute_mapped_collection('locale'),
+                comparator_factory=TranslationComparator,
+                cascade='all, delete-orphan',
+                passive_deletes=True,
+            )
+
+    def assign_translation_parent(self):
+        if 'translation_parent' not in self.translation_cls.__dict__:
+            setattr(
+                self.translation_cls,
+                'translation_parent',
+                sa.orm.relationship(
+                    self.parent_cls,
+                    uselist=False,
+                    viewonly=True
+                )
+            )
+
+    def __call__(self):
+        self.assign_single_translations()
+        self.assign_current_translation()
+        self.assign_translations()
+        self.assign_translation_parent()
+
