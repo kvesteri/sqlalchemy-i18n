@@ -1,9 +1,9 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from .exc import ImproperlyConfigured
 
-class ImproperlyConfigured(Exception):
-    pass
+
 
 
 class HybridPropertyBuilder(object):
@@ -11,12 +11,6 @@ class HybridPropertyBuilder(object):
         self.manager = manager
         self.translation_model = translation_model
         self.model = self.translation_model.__parent_class__
-
-    def option(self, name):
-        try:
-            return self.model.__translatable__[name]
-        except (AttributeError, KeyError):
-            return self.manager.options[name]
 
     def getter_factory(self, name):
         def attribute_getter(obj):
@@ -51,15 +45,21 @@ class HybridPropertyBuilder(object):
             )
         )
 
-    def detect_collisions(self, column_name):
+    def detect_collisions(self, property_name):
+        """
+        Detects possible naming collisions for given property name.
+
+        :raises sqlalchemy_i18n.exc.ImproperlyConfigured: if the model already
+            has a property with given name
+        """
         mapper = sa.inspect(self.model)
-        if mapper.has_property(column_name):
+        if mapper.has_property(property_name):
             raise ImproperlyConfigured(
                 "Attribute name collision detected. Could not create "
                 "hybrid property for translated attribute '%s'. "
                 "An attribute with the same already exists in parent "
                 "class '%s'." % (
-                    column_name,
+                    property_name,
                     self.model.__name__
                 )
             )
