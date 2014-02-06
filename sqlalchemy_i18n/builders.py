@@ -12,9 +12,9 @@ class HybridPropertyBuilder(object):
         self.translation_model = translation_model
         self.model = self.translation_model.__parent_class__
 
-    def getter_factory(self, name):
+    def getter_factory(self, property_name):
         def attribute_getter(obj):
-            value = getattr(obj.current_translation, name)
+            value = getattr(obj.current_translation, property_name)
             if value:
                 return value
 
@@ -23,25 +23,40 @@ class HybridPropertyBuilder(object):
                 default_locale = default_locale(obj)
             return getattr(
                 obj.translations[default_locale],
-                name
+                property_name
             )
 
         return attribute_getter
 
-    def setter_factory(self, name):
+    def setter_factory(self, property_name):
+        """
+        Returns a hybrid property setter for given property name.
+
+        :param property_name: Name of the property to generate a setter for
+        """
         return (
             lambda obj, value:
-            setattr(obj.current_translation, name, value)
+            setattr(obj.current_translation, property_name, value)
         )
 
-    def assign_attr_getter_setters(self, attr):
+    def generate_hybrid(self, property_name):
+        """
+        Generates a SQLAlchemy hybrid property for given translation model
+        property.
+
+        :param property_name:
+            Name of the translation model property to generate hybrid property
+            for.
+        """
         setattr(
             self.model,
-            attr,
+            property_name,
             hybrid_property(
-                fget=self.getter_factory(attr),
-                fset=self.setter_factory(attr),
-                expr=lambda cls: getattr(cls.__translatable__['class'], attr)
+                fget=self.getter_factory(property_name),
+                fset=self.setter_factory(property_name),
+                expr=lambda cls: getattr(
+                    cls.__translatable__['class'], property_name
+                )
             )
         )
 
@@ -74,4 +89,4 @@ class HybridPropertyBuilder(object):
                 continue
 
             self.detect_collisions(column.key)
-            self.assign_attr_getter_setters(column.key)
+            self.generate_hybrid(column.key)
