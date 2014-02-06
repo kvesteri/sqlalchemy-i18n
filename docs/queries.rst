@@ -34,12 +34,20 @@ Joinedload arbitrary translations
     )
 
 
+You can also use attribute accessors::
+
+
+    articles = (
+        session.query(Article)
+        .options(sa.orm.joinedload(Article.translations.fi))
+        .options(sa.orm.joinedload(Article.translations.en))
+    )
+
+
 Joinedload all translations
 ---------------------------
 
 ::
-
-    import sqlalchemy as sa
 
 
     articles = (
