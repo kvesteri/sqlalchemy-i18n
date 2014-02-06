@@ -77,20 +77,6 @@ Other options
 
     After this two users edit the finnish translation of this article at the same time. The application tries to create finnish translation twice resulting in database integrity errors.
 
-* base_classes
+* fallback_locale
 
-    What base classes should the translation class use.
-
-* table_name
-
-    Table name template for translation tables. By default this is '%s_translation', indicating that for example the translation table name of table 'article' would be 'article_translation'.
-
-* locale_column_name
-
-    The name of the locale column in translation tables. By default this is 'locale'.
-
-* default_locale
-
-    Default locale to use. By default this is 'en'.
-
-* get_locale_fallback
+    The locale which will be used as a fallback for translation hybrid properties that return None or empty string.
