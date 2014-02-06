@@ -86,8 +86,9 @@ class TranslationsMapping(object):
             not session or not has_identity(self.obj)
         ):
             return self.obj._translations.get(locale)
+
         return session.query(self.obj.__translatable__['class']).get(
-            (self.obj.id, locale)
+            sa.inspect(self.obj).identity + (locale, )
         )
 
     def __getitem__(self, locale):

@@ -1,12 +1,11 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy_utils.functions import primary_keys
 
 from .comparators import TranslationComparator
 from .exc import ImproperlyConfigured
 from .utils import option
-
-
 
 
 class HybridPropertyBuilder(object):
@@ -101,21 +100,31 @@ class RelationshipBuilder(object):
         self.translation_cls = translation_cls
         self.parent_cls = self.translation_cls.__parent_class__
 
+    @property
+    def primary_key_conditions(self):
+        conditions = []
+        for column in primary_keys(self.parent_cls):
+            conditions.append(
+                getattr(self.parent_cls, column.key) ==
+                getattr(self.translation_cls, column.key)
+            )
+        return conditions
+
     def assign_single_translations(self):
         for locale in option(self.parent_cls, 'locales'):
             key = '_translation_%s' % locale
             if key in self.parent_cls.__dict__:
                 continue
+
+            conditions = self.primary_key_conditions
+            conditions.append(self.translation_cls.locale == locale)
             setattr(
                 self.parent_cls,
                 key,
                 sa.orm.relationship(
                     self.translation_cls,
-                    primaryjoin=sa.and_(
-                        self.parent_cls.id == self.translation_cls.id,
-                        self.translation_cls.locale == locale
-                    ),
-                    foreign_keys=[self.parent_cls.id],
+                    primaryjoin=sa.and_(*conditions),
+                    foreign_keys=list(primary_keys(self.parent_cls)),
                     uselist=False,
                     viewonly=True
                 )
@@ -128,23 +137,30 @@ class RelationshipBuilder(object):
             pass
         else:
             if '_current_translation' not in self.parent_cls.__dict__:
+                conditions = self.primary_key_conditions
+                conditions.append(
+                    self.translation_cls.locale == current_locale
+                )
+
                 self.parent_cls._current_translation = sa.orm.relationship(
                     self.translation_cls,
-                    primaryjoin=sa.and_(
-                        self.parent_cls.id == self.translation_cls.id,
-                        self.translation_cls.locale == current_locale,
-                    ),
-                    foreign_keys=[self.parent_cls.id],
+                    primaryjoin=sa.and_(*conditions),
+                    foreign_keys=list(primary_keys(self.parent_cls)),
                     viewonly=True,
                     uselist=False
                 )
 
     def assign_translations(self):
         if not hasattr(self.parent_cls, '_translations'):
+            foreign_keys = [
+                getattr(self.translation_cls, column.key)
+                for column in primary_keys(self.parent_cls)
+            ]
+
             self.parent_cls._translations = sa.orm.relationship(
                 self.translation_cls,
-                primaryjoin=self.parent_cls.id == self.translation_cls.id,
-                foreign_keys=[self.translation_cls.id],
+                primaryjoin=sa.and_(*self.primary_key_conditions),
+                foreign_keys=foreign_keys,
                 collection_class=attribute_mapped_collection('locale'),
                 comparator_factory=TranslationComparator,
                 cascade='all, delete-orphan',

@@ -2,7 +2,6 @@ from sqlalchemy.orm.relationships import RelationshipProperty
 from .exc import UnknownLocaleError
 
 
-
 class TranslationComparator(RelationshipProperty.Comparator):
     def __getitem__(self, key):
         return getattr(self._parentmapper.class_, '_translation_%s' % key)
