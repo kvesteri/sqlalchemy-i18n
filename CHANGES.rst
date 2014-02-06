@@ -7,8 +7,9 @@ Here you can see the full list of changes between each SQLAlchemy-i18n release.
 0.8.0 (2014-02-xx)
 ^^^^^^^^^^^^^^^^^^
 
-- Add _translations relationship for Translatable classes
-- Rewritten relationship model for Translatable classes
+- Add _translations relationship for translatable classes
+- Rewritten relationship model for translatable classes
+- New more robust syntax for declaring translation models
 - Composite primary key support for translation parent classes
 
 
