@@ -151,6 +151,10 @@ class RelationshipBuilder(object):
                 )
 
     def assign_translations(self):
+        """
+        Assigns translations relationship for translatable model. The assigned
+        attribute is a relationship to all translation locales.
+        """
         if not hasattr(self.parent_cls, '_translations'):
             foreign_keys = [
                 getattr(self.translation_cls, column.key)

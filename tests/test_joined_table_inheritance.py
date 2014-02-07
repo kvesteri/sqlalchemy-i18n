@@ -1,4 +1,3 @@
-from pytest import raises
 import sqlalchemy as sa
 from sqlalchemy_i18n import Translatable, translation_base
 from tests import TestCase
