@@ -131,6 +131,10 @@ class RelationshipBuilder(object):
             )
 
     def assign_current_translation(self):
+        """
+        Assigns the current translation relationship for translatable parent
+        class.
+        """
         try:
             current_locale = self.parent_cls.locale
         except NotImplementedError:
