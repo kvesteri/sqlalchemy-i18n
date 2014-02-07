@@ -4,7 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
-0.8.0 (2014-02-xx)
+0.8.1 (2014-02-07)
+^^^^^^^^^^^^^^^^^^
+
+- Fixed common base class handling (__translatable__ args copied to each child class now)
+
+
+0.8.0 (2014-02-06)
 ^^^^^^^^^^^^^^^^^^
 
 - Add _translations relationship for translatable classes

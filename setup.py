@@ -37,7 +37,7 @@ extras_require = {
 
 setup(
     name='SQLAlchemy-i18n',
-    version='0.8.0',
+    version='0.8.1',
     url='https://github.com/kvesteri/sqlalchemy-i18n',
     license='BSD',
     author='Konsta Vesterinen',
