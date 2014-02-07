@@ -14,9 +14,16 @@ class BaseTranslationMixin(object):
     pass
 
 
-def translation_base(parent_cls):
+def translation_base_class_factory(parent_cls):
+    return declarative_base(parent_cls)
+
+
+def translation_base(parent_cls, base_class_factory=None):
+    if base_class_factory is None:
+        base_class_factory = translation_base_class_factory
+
     class TranslationMixin(
-        declarative_base(parent_cls),
+        base_class_factory(parent_cls),
         BaseTranslationMixin
     ):
         __abstract__ = True
