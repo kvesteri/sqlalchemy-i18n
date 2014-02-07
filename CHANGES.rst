@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.8.2 (2014-02-07)
+^^^^^^^^^^^^^^^^^^
+
+- Add custom base class support for translation_base
+- Better exception message for UnknownLocaleError
+
+
 0.8.1 (2014-02-07)
 ^^^^^^^^^^^^^^^^^^
 
