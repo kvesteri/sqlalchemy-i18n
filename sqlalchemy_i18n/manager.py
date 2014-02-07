@@ -1,3 +1,4 @@
+from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
 from sqlalchemy_utils.functions import declarative_base, primary_keys
@@ -84,6 +85,10 @@ class TranslationManager(object):
         for cls in self.pending_classes:
             self.class_map[cls.__parent_class__] = cls
             parent_cls = cls.__parent_class__
+            # Args need to be copied to avoid scenarios where many child
+            # classes inherit the __translatable__ dict from parent class and
+            # then have the same reference to same dict.
+            parent_cls.__translatable__ = copy(parent_cls.__translatable__)
             parent_cls.__translatable__['manager'] = self
             parent_cls.__translatable__['class'] = cls
 
