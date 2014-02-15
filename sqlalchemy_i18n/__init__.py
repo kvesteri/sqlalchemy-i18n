@@ -2,11 +2,9 @@ import sqlalchemy as sa
 from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager, translation_base
 from .translatable import Translatable, UnknownLocaleError
-from .utils import default_locale
 
 
 __all__ = (
-    default_locale,
     translation_base,
     ImproperlyConfigured,
     Translatable,
@@ -65,7 +63,7 @@ def find_translations(obj, property_name, locale):
                 property_ ==
                 getattr(obj, property_name),
                 translation_class.locale ==
-                default_locale(obj)
+                obj.locale
             )
         )
     )
