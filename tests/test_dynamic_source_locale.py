@@ -1,10 +1,11 @@
+from pytest import raises
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy_i18n import Translatable, translation_base
+from sqlalchemy_i18n import Translatable, translation_base, UnknownLocaleError
 from tests import TestCase
 
 
-class TestDynamicSourceLocale(TestCase):
+class TestHybridPropertyAsDynamicSourceLocale(TestCase):
     def setup_method(self, method):
         TestCase.setup_method(self, method)
         self.ArticleTranslation = self.Article.__translatable__['class']
@@ -50,3 +51,32 @@ class TestDynamicSourceLocale(TestCase):
         article.translations['en']
 
         assert self.connection.query_count == count + 1
+
+
+class TestColumnAsDynamicSourceLocale(TestCase):
+    def create_models(self):
+        class Article(self.Model, Translatable):
+            __tablename__ = 'article'
+            __translatable__ = {
+                'locales': self.locales
+            }
+
+            id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+            description = sa.Column(sa.UnicodeText)
+            locale = sa.Column(sa.Unicode(10), default=u'en')
+
+            def __repr__(self):
+                return 'Article(%r)' % self.name
+
+        class ArticleTranslation(translation_base(Article)):
+            __tablename__ = 'article_translation'
+
+            name = sa.Column(sa.Unicode(255))
+
+            content = sa.Column(sa.UnicodeText)
+
+        self.Article = Article
+
+    def test_current_translation_when_locale_not_set(self):
+        with raises(UnknownLocaleError):
+            article = self.Article(name='some article')

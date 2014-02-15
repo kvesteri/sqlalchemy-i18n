@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.8.3 (2014-02-15)
+^^^^^^^^^^^^^^^^^^
+
+- Fixed infinite recursion issue with UnknownLocaleError when given object repr() uses
+translated columns
+
+
 0.8.2 (2014-02-07)
 ^^^^^^^^^^^^^^^^^^
 
