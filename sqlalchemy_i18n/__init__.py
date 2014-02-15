@@ -25,6 +25,19 @@ def make_translatable(
     manager=translation_manager,
     options={}
 ):
+    """
+    Assigns translation listeners for given mapper and session.
+
+    :param mapper:
+        SQLAlchemy declarative class or mapper to apply translation listeners
+        into.
+    :param session:
+        SQLAlchemy session class.
+    :param manager:
+        SQLAlchemy-i18n TranslationManager instance
+    :param options:
+        TranslationManager options
+    """
     manager.options.update(options)
 
     sa.event.listen(
