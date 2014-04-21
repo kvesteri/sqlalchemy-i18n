@@ -1,7 +1,7 @@
 from copy import copy
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
-from sqlalchemy_utils.functions import declarative_base, primary_keys
+from sqlalchemy_utils.functions import get_declarative_base, get_primary_keys
 
 from .builders import HybridPropertyBuilder, RelationshipBuilder
 from .utils import all_translated_columns, is_string
@@ -14,13 +14,9 @@ class BaseTranslationMixin(object):
     pass
 
 
-def translation_base_class_factory(parent_cls):
-    return declarative_base(parent_cls)
-
-
 def translation_base(parent_cls, base_class_factory=None):
     if base_class_factory is None:
-        base_class_factory = translation_base_class_factory
+        base_class_factory = get_declarative_base
 
     class TranslationMixin(
         base_class_factory(parent_cls),
@@ -34,16 +30,18 @@ def translation_base(parent_cls, base_class_factory=None):
             if has_inherited_table(cls):
                 return tuple()
             else:
-                names = [column.name for column in primary_keys(parent_cls)]
+                names = get_primary_keys(parent_cls).keys()
 
-                return (sa.schema.ForeignKeyConstraint(
-                    names,
-                    [
-                        '%s.%s' % (parent_cls.__tablename__, name)
-                        for name in names
-                    ],
-                    ondelete='CASCADE'
-                ), )
+                return (
+                    sa.schema.ForeignKeyConstraint(
+                        names,
+                        [
+                            '%s.%s' % (parent_cls.__tablename__, name)
+                            for name in names
+                        ],
+                        ondelete='CASCADE'
+                    ),
+                )
 
     for column in parent_cls.__table__.c:
         if column.primary_key:

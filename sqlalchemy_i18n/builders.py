@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy_utils.functions import primary_keys
+from sqlalchemy_utils.functions import get_primary_keys
 
 from .comparators import TranslationComparator
 from .exc import ImproperlyConfigured
@@ -94,7 +94,6 @@ class HybridPropertyBuilder(object):
             self.generate_hybrid(column.key)
 
 
-
 class RelationshipBuilder(object):
     def __init__(self, translation_cls):
         self.translation_cls = translation_cls
@@ -103,10 +102,10 @@ class RelationshipBuilder(object):
     @property
     def primary_key_conditions(self):
         conditions = []
-        for column in primary_keys(self.parent_cls):
+        for key in get_primary_keys(self.parent_cls).keys():
             conditions.append(
-                getattr(self.parent_cls, column.key) ==
-                getattr(self.translation_cls, column.key)
+                getattr(self.parent_cls, key) ==
+                getattr(self.translation_cls, key)
             )
         return conditions
 
@@ -124,7 +123,7 @@ class RelationshipBuilder(object):
                 sa.orm.relationship(
                     self.translation_cls,
                     primaryjoin=sa.and_(*conditions),
-                    foreign_keys=list(primary_keys(self.parent_cls)),
+                    foreign_keys=get_primary_keys(self.parent_cls).values(),
                     uselist=False,
                     viewonly=True
                 )
@@ -149,7 +148,7 @@ class RelationshipBuilder(object):
                 self.parent_cls._current_translation = sa.orm.relationship(
                     self.translation_cls,
                     primaryjoin=sa.and_(*conditions),
-                    foreign_keys=list(primary_keys(self.parent_cls)),
+                    foreign_keys=get_primary_keys(self.parent_cls).values(),
                     viewonly=True,
                     uselist=False
                 )
@@ -161,8 +160,8 @@ class RelationshipBuilder(object):
         """
         if not hasattr(self.parent_cls, '_translations'):
             foreign_keys = [
-                getattr(self.translation_cls, column.key)
-                for column in primary_keys(self.parent_cls)
+                getattr(self.translation_cls, column_key)
+                for column_key in get_primary_keys(self.parent_cls).keys()
             ]
 
             self.parent_cls._translations = sa.orm.relationship(
@@ -192,4 +191,3 @@ class RelationshipBuilder(object):
         self.assign_current_translation()
         self.assign_translations()
         self.assign_translation_parent()
-

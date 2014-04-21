@@ -14,7 +14,7 @@ __all__ = (
 )
 
 
-__version__ = '0.8.3'
+__version__ = '0.8.4'
 
 
 def make_translatable(
@@ -71,7 +71,7 @@ def find_translations(obj, property_name, locale):
     conditions = [
         translation_class.id.in_(subquery),
         translation_class.locale == locale,
-        property_ != None
+        property_.isnot(None)
     ]
 
     total_count = (

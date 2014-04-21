@@ -21,7 +21,7 @@ In order to make your models use SQLAlchemy-i18n you need two things:
     class Article(Base):
         __tablename__ = 'article'
         __translatable__ = {
-            'locales': [u'en', u'fi']
+            'locales': ['en', 'fi']
         }
         locale = 'en'  # this defines the default locale
 
