@@ -123,7 +123,9 @@ class RelationshipBuilder(object):
                 sa.orm.relationship(
                     self.translation_cls,
                     primaryjoin=sa.and_(*conditions),
-                    foreign_keys=get_primary_keys(self.parent_cls).values(),
+                    foreign_keys=list(
+                        get_primary_keys(self.parent_cls).values()
+                    ),
                     uselist=False,
                     viewonly=True
                 )
@@ -148,7 +150,9 @@ class RelationshipBuilder(object):
                 self.parent_cls._current_translation = sa.orm.relationship(
                     self.translation_cls,
                     primaryjoin=sa.and_(*conditions),
-                    foreign_keys=get_primary_keys(self.parent_cls).values(),
+                    foreign_keys=list(
+                        get_primary_keys(self.parent_cls).values()
+                    ),
                     viewonly=True,
                     uselist=False
                 )

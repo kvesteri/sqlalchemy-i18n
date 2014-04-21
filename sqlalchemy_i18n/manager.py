@@ -30,7 +30,7 @@ def translation_base(parent_cls, base_class_factory=None):
             if has_inherited_table(cls):
                 return tuple()
             else:
-                names = get_primary_keys(parent_cls).keys()
+                names = list(get_primary_keys(parent_cls).keys())
 
                 return (
                     sa.schema.ForeignKeyConstraint(
