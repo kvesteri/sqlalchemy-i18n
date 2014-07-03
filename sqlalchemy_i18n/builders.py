@@ -82,7 +82,8 @@ class HybridPropertyBuilder(object):
             )
 
     def __call__(self):
-        for column in self.translation_model.__table__.c:
+        mapper = sa.orm.class_mapper(self.translation_model)
+        for column in mapper.local_table.c:
             exclude = self.manager.option(
                 self.model, 'exclude_hybrid_properties'
             )
@@ -110,26 +111,23 @@ class RelationshipBuilder(object):
         return conditions
 
     def assign_single_translations(self):
+        mapper = sa.orm.class_mapper(self.parent_cls)
         for locale in option(self.parent_cls, 'locales'):
             key = '_translation_%s' % locale
-            if key in self.parent_cls.__dict__:
+            if mapper.has_property(key):
                 continue
 
             conditions = self.primary_key_conditions
             conditions.append(self.translation_cls.locale == locale)
-            setattr(
-                self.parent_cls,
-                key,
-                sa.orm.relationship(
-                    self.translation_cls,
-                    primaryjoin=sa.and_(*conditions),
-                    foreign_keys=list(
-                        get_primary_keys(self.parent_cls).values()
-                    ),
-                    uselist=False,
-                    viewonly=True
-                )
-            )
+            mapper.add_property(key, sa.orm.relationship(
+                self.translation_cls,
+                primaryjoin=sa.and_(*conditions),
+                foreign_keys=list(
+                    get_primary_keys(self.parent_cls).values()
+                ),
+                uselist=False,
+                viewonly=True
+            ))
 
     def assign_current_translation(self):
         """
@@ -141,13 +139,14 @@ class RelationshipBuilder(object):
         except NotImplementedError:
             pass
         else:
-            if '_current_translation' not in self.parent_cls.__dict__:
+            mapper = sa.orm.class_mapper(self.parent_cls)
+            if not mapper.has_property('_current_translation'):
                 conditions = self.primary_key_conditions
                 conditions.append(
                     self.translation_cls.locale == current_locale
                 )
 
-                self.parent_cls._current_translation = sa.orm.relationship(
+                mapper.add_property('_current_translation', sa.orm.relationship(
                     self.translation_cls,
                     primaryjoin=sa.and_(*conditions),
                     foreign_keys=list(
@@ -155,20 +154,21 @@ class RelationshipBuilder(object):
                     ),
                     viewonly=True,
                     uselist=False
-                )
+                ))
 
     def assign_translations(self):
         """
         Assigns translations relationship for translatable model. The assigned
         attribute is a relationship to all translation locales.
         """
-        if not hasattr(self.parent_cls, '_translations'):
+        mapper = sa.orm.class_mapper(self.parent_cls)
+        if not mapper.has_property('_translations'):
             foreign_keys = [
                 getattr(self.translation_cls, column_key)
                 for column_key in get_primary_keys(self.parent_cls).keys()
             ]
 
-            self.parent_cls._translations = sa.orm.relationship(
+            mapper.add_property('_translations', sa.orm.relationship(
                 self.translation_cls,
                 primaryjoin=sa.and_(*self.primary_key_conditions),
                 foreign_keys=foreign_keys,
@@ -176,19 +176,16 @@ class RelationshipBuilder(object):
                 comparator_factory=TranslationComparator,
                 cascade='all, delete-orphan',
                 passive_deletes=True,
-            )
+            ))
 
     def assign_translation_parent(self):
-        if 'translation_parent' not in self.translation_cls.__dict__:
-            setattr(
-                self.translation_cls,
-                'translation_parent',
-                sa.orm.relationship(
-                    self.parent_cls,
-                    uselist=False,
-                    viewonly=True
-                )
-            )
+        mapper = sa.orm.class_mapper(self.translation_cls)
+        if not mapper.has_property('translation_parent'):
+            mapper.add_property('translation_parent', sa.orm.relationship(
+                self.parent_cls,
+                uselist=False,
+                viewonly=True
+            ))
 
     def __call__(self):
         self.assign_single_translations()
