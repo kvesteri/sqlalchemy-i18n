@@ -28,7 +28,7 @@ class Base(object):
             keys = "detached-instance"
         else:
             keys = ', '.join(u'%s=%r' % (f.name, v)
-                              for f, v in map(None, pkeyf, pkeyv))
+                             for f, v in zip(pkeyf, pkeyv))
         return '%s(%s)' % (self.__class__.__name__, keys)
 
 
