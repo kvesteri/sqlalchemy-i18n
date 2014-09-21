@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from pytest import raises
 from sqlalchemy_i18n import UnknownLocaleError
-from tests import TestCase
+from tests import DeclarativeTestCase, ClassicTestCase
 
 
-class TestTranslationMapping(TestCase):
+class Suite(object):
     def test_proxy_contains(self):
         article = self.Article()
         article.translations['en']
@@ -64,3 +66,11 @@ class TestTranslationMapping(TestCase):
         for value in values:
             assert isinstance(value, article.__translatable__['class'])
         assert len(values) == 2
+
+
+class TestDeclarative(Suite, DeclarativeTestCase):
+    pass
+
+
+class TestClassic(Suite, ClassicTestCase):
+    pass

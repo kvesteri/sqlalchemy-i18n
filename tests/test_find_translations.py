@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+
 from decimal import Decimal
 from sqlalchemy_i18n import find_translations
-from tests import TestCase
+from tests import DeclarativeTestCase, ClassicTestCase
 
 
-class TestFindTranslations(TestCase):
+class Suite(object):
     locales = ['en', 'fi', 'sv']
 
     def test_with_full_confidence(self):
@@ -49,3 +50,11 @@ class TestFindTranslations(TestCase):
             u'Joku artikkeli': Decimal('0.5'),
             u'Joku toinen artikkeli': Decimal('0.5')
         }
+
+
+class TestDeclarative(Suite, DeclarativeTestCase):
+    pass
+
+
+class TestClassic(Suite, ClassicTestCase):
+    pass

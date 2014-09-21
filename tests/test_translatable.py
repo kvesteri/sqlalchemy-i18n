@@ -1,7 +1,9 @@
-from tests import TestCase
+# -*- coding: utf-8 -*-
+
+from tests import DeclarativeTestCase, ClassicTestCase
 
 
-class TestTranslatableModel(TestCase):
+class Suite(object):
     def test_auto_creates_relations(self):
         article = self.Article()
         assert article.translations
@@ -18,13 +20,6 @@ class TestTranslatableModel(TestCase):
         article.name = u'Some article'
         assert article.current_translation == article.translations['en']
 
-    def test_translated_columns(self):
-        article = self.Article()
-        columns = article.__translatable__['class'].__table__.c
-        assert 'name' in columns
-        assert 'content' in columns
-        assert 'description' not in columns
-
     def test_property_delegators(self):
         article = self.Article()
         article.translations['en']
@@ -35,10 +30,6 @@ class TestTranslatableModel(TestCase):
         article.name = u'some other thing'
         assert article.current_translation.name == u'some other thing'
         assert article.translations['en'].name == u'some other thing'
-
-    def test_appends_locale_column_to_translation_table(self):
-        table = self.Model.metadata.tables['article_translation']
-        assert 'locale' in table.c
 
     def test_commit_session(self):
         article = self.Article()
@@ -59,3 +50,28 @@ class TestTranslatableModel(TestCase):
         article.content = u'Some content'
         self.session.delete(article)
         self.session.commit()
+
+
+class TestDeclarative(Suite, DeclarativeTestCase):
+    def test_translated_columns(self):
+        article = self.Article()
+        columns = article.__translatable__['class'].__table__.c
+        assert 'name' in columns
+        assert 'content' in columns
+        assert 'description' not in columns
+
+    def test_appends_locale_column_to_translation_table(self):
+        table = self.Model.metadata.tables['article_translation']
+        assert 'locale' in table.c
+
+
+class TestClassic(Suite, ClassicTestCase):
+    def test_translated_columns(self):
+        columns = self.article_translation.c
+        assert 'name' in columns
+        assert 'content' in columns
+        assert 'description' not in columns
+
+    def test_appends_locale_column_to_translation_table(self):
+        table = self.article_translation
+        assert 'locale' in table.c
