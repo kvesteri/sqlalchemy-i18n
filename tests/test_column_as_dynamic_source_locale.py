@@ -73,7 +73,3 @@ class TestClassic(Suite, ClassicTestCase):
 
         self.Article = Article
         self.ArticleTranslation = ArticleTranslation
-
-    def test_current_translation_when_locale_not_set(self):
-        with raises(UnknownLocaleError):
-            self.Article(name='some article')
