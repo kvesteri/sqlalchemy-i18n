@@ -11,6 +11,7 @@ SQLAlchemy-i18n has been tested against the following Python platforms.
 - cPython 2.6
 - cPython 2.7
 - cPython 3.3
+- cPython 3.4
 
 
 Installing an official release
