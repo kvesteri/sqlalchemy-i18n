@@ -4,10 +4,16 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+0.9.0 (2014-09-30)
+^^^^^^^^^^^^^^^^^^
+
+- Added support for classical SQLAlchemy mappings
+
+
 0.8.4 (2014-04-21)
 ^^^^^^^^^^^^^^^^^^
 
-- Added enhanced columna aliases handling
+- Added enhanced column aliases handling
 - Updated SQLAlchemy-Utils dependency to 0.25.3
 
 
