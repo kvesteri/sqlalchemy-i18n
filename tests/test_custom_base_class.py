@@ -1,9 +1,16 @@
+# -*- coding: utf-8 -*-
+
 import sqlalchemy as sa
 from sqlalchemy_i18n import Translatable, translation_base
-from tests import TestCase
+from tests import DeclarativeTestCase
 
 
-class TestCommonBaseClass(TestCase):
+class Suite(object):
+    def test_translatable_dict_copied_to_each_child_class(self):
+        assert issubclass(self.ArticleTranslation, self.TranslationBase)
+
+
+class TestDeclarative(Suite, DeclarativeTestCase):
     def create_models(self):
         class Base(self.Model):
             __abstract__ = True
@@ -26,5 +33,5 @@ class TestCommonBaseClass(TestCase):
         self.Article = Article
         self.ArticleTranslation = ArticleTranslation
 
-    def test_translatable_dict_copied_to_each_child_class(self):
-        assert issubclass(self.ArticleTranslation, self.TranslationBase)
+
+# This is the common case in Classic mapping, no test needed

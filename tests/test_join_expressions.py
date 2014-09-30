@@ -1,8 +1,9 @@
-import sqlalchemy as sa
-from tests import TestCase
+# -*- coding: utf-8 -*-
+
+from tests import DeclarativeTestCase, ClassicTestCase
 
 
-class TestJoinExpressions(TestCase):
+class Suite(object):
     def test_current_translation_as_expression(self):
         query = (
             self.session.query(self.Article)
@@ -41,60 +42,9 @@ class TestJoinExpressions(TestCase):
         assert 'FROM article_translation' in str(query)
 
 
-class TestJoinedLoading(TestCase):
-    def setup_method(self, method):
-        TestCase.setup_method(self, method)
-        article = self.Article(
-            description=u'Some desription',
-            name=u'Some name'
-        )
-        self.session.add(article)
-        self.session.commit()
-        self.session.expunge_all()
+class TestDeclarative(Suite, DeclarativeTestCase):
+    pass
 
-    def test_joinedload_for_current_translation(self):
-        article = (
-            self.session.query(self.Article)
-            .options(sa.orm.joinedload(self.Article.current_translation))
-        ).first()
-        query_count = self.connection.query_count
-        article.name
-        assert query_count == self.connection.query_count
 
-    def test_contains_eager_for_current_translation(self):
-        article = (
-            self.session.query(self.Article)
-            .join(self.Article.current_translation)
-            .options(sa.orm.contains_eager(self.Article.current_translation))
-        ).first()
-        query_count = self.connection.query_count
-        article.name
-        assert query_count == self.connection.query_count
-
-    def test_joinedload_for_single_translation(self):
-        article = (
-            self.session.query(self.Article)
-            .options(sa.orm.joinedload(self.Article.translations['en']))
-        ).first()
-        query_count = self.connection.query_count
-        article.name
-        assert query_count == self.connection.query_count
-
-    def test_joinedload_for_attr_accessor(self):
-        article = (
-            self.session.query(self.Article)
-            .options(sa.orm.joinedload(self.Article.translations.en))
-        ).first()
-        query_count = self.connection.query_count
-        article.name
-        assert query_count == self.connection.query_count
-
-    def test_joinedload_for_all_translations(self):
-        article = (
-            self.session.query(self.Article)
-            .options(sa.orm.joinedload(self.Article.translations))
-        ).first()
-        query_count = self.connection.query_count
-        article.name
-        article.translations['fi'].name
-        assert query_count == self.connection.query_count
+class TestClassic(Suite, ClassicTestCase):
+    pass

@@ -7,13 +7,14 @@ from tests import DeclarativeTestCase, ClassicTestCase, ClassicBase
 
 
 class Suite(object):
-    def test_relationships(self):
-        article = self.Article(id1=1, id2=1)
+    def test_hybrid_properties_support_callable_fallback_locales(self):
+        article = self.Article(locale=u'en')
         article.name = u'Some article'
-        self.session.add(article)
-        self.session.commit()
-
         assert article.name == u'Some article'
+
+    def test_locale_fallback(self):
+        article = self.Article(locale=u'en')
+        article.name
 
 
 class TestDeclarative(Suite, DeclarativeTestCase):
@@ -21,15 +22,13 @@ class TestDeclarative(Suite, DeclarativeTestCase):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
             __translatable__ = {
-                'locales': ['fi', 'en'],
+                'locales': self.locales,
                 'auto_create_locales': True,
+                'fallback_locale': lambda self: self.locale or 'en'
             }
 
-            id1 = sa.Column(sa.Integer, primary_key=True)
-
-            id2 = sa.Column(sa.Integer, primary_key=True)
-
-            locale = 'en'
+            id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
+            locale = sa.Column(sa.Unicode(255), default=u'en')
 
         class ArticleTranslation(translation_base(Article)):
             __tablename__ = 'article_translation'
@@ -37,49 +36,43 @@ class TestDeclarative(Suite, DeclarativeTestCase):
             name = sa.Column(sa.Unicode(255))
 
         self.Article = Article
-        self.ArticleTranslation = ArticleTranslation
 
 
 class TestClassic(Suite, ClassicTestCase):
     def create_tables(self):
         self.article = sa.Table(
             'article', self.metadata,
-            sa.Column('id1', sa.Integer,
+            sa.Column('id', sa.Integer,
                       autoincrement=True,
                       primary_key=True,
                       nullable=False),
-            sa.Column('id2', sa.Integer,
-                      autoincrement=True,
-                      primary_key=True,
-                      nullable=False))
+            sa.Column('locale', sa.types.CHAR(2), default='en'))
         self.article_translation = sa.Table(
             'article_translation', self.metadata,
-            sa.Column('id1', sa.Integer,
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('id2', sa.Integer,
+            sa.Column('id', sa.Integer, sa.ForeignKey('article'),
                       primary_key=True,
                       nullable=False),
             sa.Column('locale', sa.types.CHAR(2),
                       primary_key=True,
                       nullable=False),
             sa.Column('name', sa.Unicode(255)),
-            sa.Column('content', sa.UnicodeText),
-            sa.ForeignKeyConstraint(['id1', 'id2'],
-                                    ['article.id1', 'article.id2']))
+            sa.Column('content', sa.UnicodeText))
 
     def create_models(self):
         class Article(ClassicBase, Translatable):
             __translatable__ = {
-                'locales': self.locales
+                'locales': self.locales,
+                'auto_create_locales': True,
+                'fallback_locale': lambda self: self.locale or 'en'
             }
             __translated_columns__ = [
+                sa.Column('name', sa.Unicode(255)),
                 sa.Column('content', sa.UnicodeText),
             ]
-            locale = 'en'
 
         class ArticleTranslation(ClassicBase, BaseTranslationMixin):
             __parent_class__ = Article
 
         self.Article = Article
         self.ArticleTranslation = ArticleTranslation
+

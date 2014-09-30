@@ -1,15 +1,27 @@
+# -*- coding: utf-8 -*-
+
 from pytest import raises
 import sqlalchemy as sa
 from sqlalchemy_i18n import (
     Translatable, translation_base, ImproperlyConfigured
 )
-from tests import TestCase
+from tests import DeclarativeTestCase
 
 
-class TestPropertyCollision(TestCase):
+class Suite(object):
     configure_mappers = False
     create_tables = False
 
+    def test_raises_exception(self):
+        with raises(ImproperlyConfigured):
+            class ArticleTranslation(translation_base(self.Article)):
+                __tablename__ = 'article_translation'
+
+                name = sa.Column(sa.Unicode(255))
+            self.Article()
+
+
+class TestDeclarative(Suite, DeclarativeTestCase):
     def create_models(self):
         class Article(self.Model, Translatable):
             __tablename__ = 'article'
@@ -28,11 +40,3 @@ class TestPropertyCollision(TestCase):
                 return 'en'
 
         self.Article = Article
-
-    def test_raises_exception(self):
-        with raises(ImproperlyConfigured):
-            class ArticleTranslation(translation_base(self.Article)):
-                __tablename__ = 'article_translation'
-
-                name = sa.Column(sa.Unicode(255))
-            self.Article()
