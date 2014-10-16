@@ -18,10 +18,6 @@ Consider the following model definition:
 
     class Article(Base):
         __tablename__ = 'article'
-        __translated_columns__ = {
-            sa.Column('name', sa.Unicode(255))
-            sa.Column('content', sa.UnicodeText)
-        }
         __translatable__ = {
             'locales': [u'en', u'fi'],
             'dynamic_source_locale': True
@@ -34,6 +30,12 @@ Consider the following model definition:
         def get_locale(self):
             return 'en'
 
+
+    class ArticleTranslation(translation_base(Article)):
+        __tablename__ = 'article_translation'
+
+        name = sa.Column(sa.Unicode(255))
+        content = sa.Column(sa.UnicodeText)
 
 
 Now you can use the dynamic source locales as follows:
