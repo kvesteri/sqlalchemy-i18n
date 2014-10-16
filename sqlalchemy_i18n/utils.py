@@ -2,6 +2,24 @@ from inspect import isclass
 import sqlalchemy as sa
 
 
+def get_current_locale(obj):
+    from sqlalchemy_utils import i18n
+
+    locale = i18n.get_locale()
+    if locale:
+        return str(locale)
+    return obj.locale
+
+
+def get_fallback_locale(obj):
+    manager = obj.__translatable__['manager']
+
+    locale = manager.option(obj, 'fallback_locale')
+    if callable(locale):
+        locale = locale(obj)
+    return locale
+
+
 def option(obj_or_class, option):
     class_ = obj_or_class if isclass(obj_or_class) else obj_or_class.__class__
     manager = class_.__translatable__['manager']
