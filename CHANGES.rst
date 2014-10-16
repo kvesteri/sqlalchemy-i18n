@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+1.0 (2014-xx-xx)
+^^^^^^^^^^^^^^^^
+
+- Made current_locale work with same schematics as class variable and object variable.
+- Add get_fallback_locale utility function
+
+
 0.9.0 (2014-09-30)
 ^^^^^^^^^^^^^^^^^^
 

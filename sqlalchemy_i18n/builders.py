@@ -4,8 +4,9 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy_utils.functions import get_primary_keys
 
 from .comparators import TranslationComparator
+from .expressions import current_locale
 from .exc import ImproperlyConfigured
-from .utils import option
+from .utils import option, get_fallback_locale
 
 
 class HybridPropertyBuilder(object):
@@ -20,11 +21,9 @@ class HybridPropertyBuilder(object):
             if value:
                 return value
 
-            default_locale = self.manager.option(obj, 'fallback_locale')
-            if callable(default_locale):
-                default_locale = default_locale(obj)
+            locale = get_fallback_locale(obj)
             return getattr(
-                obj.translations[default_locale],
+                obj.translations[locale],
                 property_name
             )
 
@@ -129,32 +128,50 @@ class RelationshipBuilder(object):
                 viewonly=True
             ))
 
+    def assign_fallback_translation(self):
+        """
+        Assigns the current translation relationship for translatable parent
+        class.
+        """
+        mapper = sa.orm.class_mapper(self.parent_cls)
+        if not mapper.has_property('_fallback_translation'):
+            conditions = self.primary_key_conditions
+            conditions.append(
+                self.translation_cls.locale ==
+                get_fallback_locale(self.parent_cls)
+            )
+
+            mapper.add_property('_fallback_translation', sa.orm.relationship(
+                self.translation_cls,
+                primaryjoin=sa.and_(*conditions),
+                foreign_keys=list(
+                    get_primary_keys(self.parent_cls).values()
+                ),
+                viewonly=True,
+                uselist=False
+            ))
+
     def assign_current_translation(self):
         """
         Assigns the current translation relationship for translatable parent
         class.
         """
-        try:
-            current_locale = self.parent_cls.locale
-        except NotImplementedError:
-            pass
-        else:
-            mapper = sa.orm.class_mapper(self.parent_cls)
-            if not mapper.has_property('_current_translation'):
-                conditions = self.primary_key_conditions
-                conditions.append(
-                    self.translation_cls.locale == current_locale
-                )
+        mapper = sa.orm.class_mapper(self.parent_cls)
+        if not mapper.has_property('_current_translation'):
+            conditions = self.primary_key_conditions
+            conditions.append(
+                self.translation_cls.locale == current_locale()
+            )
 
-                mapper.add_property('_current_translation', sa.orm.relationship(
-                    self.translation_cls,
-                    primaryjoin=sa.and_(*conditions),
-                    foreign_keys=list(
-                        get_primary_keys(self.parent_cls).values()
-                    ),
-                    viewonly=True,
-                    uselist=False
-                ))
+            mapper.add_property('_current_translation', sa.orm.relationship(
+                self.translation_cls,
+                primaryjoin=sa.and_(*conditions),
+                foreign_keys=list(
+                    get_primary_keys(self.parent_cls).values()
+                ),
+                viewonly=True,
+                uselist=False
+            ))
 
     def assign_translations(self):
         """
@@ -190,5 +207,6 @@ class RelationshipBuilder(object):
     def __call__(self):
         self.assign_single_translations()
         self.assign_current_translation()
+        self.assign_fallback_translation()
         self.assign_translations()
         self.assign_translation_parent()

@@ -4,20 +4,20 @@ from tests import DeclarativeTestCase, ClassicTestCase
 
 
 class Suite(object):
-    def test_as_object_property(self):
+    def test_as_object_property_with_force_locale(self):
         article = self.Article()
         article.name = u'Some article'
         article.content = u'Some content'
         self.session.add(article)
         self.session.commit()
-        assert article.current_translation.name == u'Some article'
+        assert article.fallback_translation == article.translations['en']
 
     def test_as_class_property(self):
-        assert self.Article.current_translation
+        assert self.Article.fallback_translation
 
     def test_setter(self):
         article = self.Article()
-        article.current_translation = self.Article.__translatable__['class'](
+        article.fallback_translation = self.Article.__translatable__['class'](
             name=u'Something'
         )
         self.session.add(article)

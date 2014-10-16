@@ -49,6 +49,7 @@ def make_translatable(
     )
 
 
+
 def find_translations(obj, property_name, locale):
     class_ = obj.__class__
     session = sa.orm.object_session(obj)

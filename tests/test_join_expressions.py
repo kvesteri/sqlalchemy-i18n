@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from tests import DeclarativeTestCase, ClassicTestCase
 
 
@@ -11,7 +10,18 @@ class Suite(object):
         )
         assert (
             'JOIN article_translation ON article.id = article_translation.id'
-            ' AND article_translation.locale = :locale'
+            ' AND article_translation.locale = :current_locale'
+            in str(query)
+        )
+
+    def test_fallback_locale_as_expression(self):
+        query = (
+            self.session.query(self.Article)
+            .join(self.Article.fallback_translation)
+        )
+        assert (
+            'JOIN article_translation ON article.id = article_translation.id'
+            ' AND article_translation.locale = :locale_1'
             in str(query)
         )
 

@@ -1,17 +1,14 @@
-from contextlib import contextmanager
-import six
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.util import has_identity
 from .exc import UnknownLocaleError
-from .utils import option
+from .utils import get_fallback_locale, get_current_locale
 
 
 class Translatable(object):
     __translatable__ = {
         'fallback_locale': 'en'
     }
-    _forced_locale = None
 
     @hybrid_property
     def locale(self):
@@ -19,32 +16,34 @@ class Translatable(object):
             'Your translatable model needs to define locale property.'
         )
 
-    @contextmanager
-    def force_locale(self, locale):
-        if locale not in option(self, 'locales'):
-            raise UnknownLocaleError(locale, self)
-        old_forced_locale = self._forced_locale
-        self._forced_locale = locale
-        yield
-        self._forced_locale = old_forced_locale
-
-    def _get_locale(self):
-        return self._forced_locale or self.locale
-
+    # Current translation getters and setters
     @hybrid_property
     def current_translation(self):
-        locale = six.text_type(self._get_locale())
-        return self.translations[locale]
+        return self.translations[get_current_locale(self)]
 
     @current_translation.setter
     def current_translation(self, obj):
-        locale = six.text_type(self._get_locale())
-        self.translations[locale] = obj
+        self.translations[get_current_locale(self)] = obj
 
     @current_translation.expression
     def current_translation(cls):
         return cls._current_translation
 
+    # Fallback translation getters and setters
+    @hybrid_property
+    def fallback_translation(self):
+        return self.translations[get_fallback_locale(self)]
+
+    @fallback_translation.setter
+    def fallback_translation(self, obj):
+        self.translations[get_fallback_locale(self)] = obj
+
+    @fallback_translation.expression
+    def fallback_translation(cls):
+        return cls._fallback_translation
+
+
+    # Translations getters and setters
     @hybrid_property
     def translations(self):
         if not hasattr(self, '_translations_mapping'):

@@ -12,6 +12,7 @@ from sqlalchemy_i18n import (
     Translatable, translation_manager, make_translatable, translation_base
 )
 from sqlalchemy_i18n.manager import BaseTranslationMixin
+import sqlalchemy_utils
 
 
 @sa.event.listens_for(Engine, 'before_cursor_execute')
@@ -23,6 +24,9 @@ make_translatable(options={'locales': ['en', 'fi']})
 
 
 warnings.simplefilter('error', sa.exc.SAWarning)
+
+
+sqlalchemy_utils.i18n.get_locale = lambda: 'en'
 
 
 class DeclarativeTestCase(object):
@@ -62,7 +66,6 @@ class DeclarativeTestCase(object):
             __tablename__ = 'article'
             __translatable__ = {
                 'locales': self.locales,
-                'default_locale': 'en'
             }
 
             @hybrid_property
@@ -169,7 +172,6 @@ class ClassicTestCase(DeclarativeTestCase):
         class Article(ClassicBase, Translatable):
             __translatable__ = {
                 'locales': self.locales,
-                'default_locale': 'en',
             }
             __translated_columns__ = [
                 sa.Column('name', sa.Unicode(255)),

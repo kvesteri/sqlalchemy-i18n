@@ -11,9 +11,7 @@ Dynamic source locale
 Sometimes you may want to have dynamic source (default) locale. This can be achieved by setting `dynamic_source_locale` as `True`.
 
 
-Consider the following model definition:
-
-::
+Consider the following model definition::
 
 
     class Article(Base):
@@ -38,10 +36,7 @@ Consider the following model definition:
         content = sa.Column(sa.UnicodeText)
 
 
-Now you can use the dynamic source locales as follows:
-
-
-::
+Now you can use the dynamic source locales as follows::
 
 
     article = Article(locale='fi', name=u'Joku artikkeli')
@@ -52,9 +47,7 @@ Now you can use the dynamic source locales as follows:
 
 
 
-As with regular translations, the translations using dynamic source locales can even be fetched efficiently using good old SQLAlchemy loading constructs:
-
-::
+As with regular translations, the translations using dynamic source locales can even be fetched efficiently using good old SQLAlchemy loading constructs::
 
 
     articles = (

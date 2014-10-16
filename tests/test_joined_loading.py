@@ -5,7 +5,6 @@ from tests import DeclarativeTestCase, ClassicTestCase
 
 
 class Suite(object):
-
     def test_joinedload_for_current_translation(self):
         article = (
             self.session.query(self.Article)
