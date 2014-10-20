@@ -31,7 +31,7 @@ class HybridPropertyBuilder(object):
 
     def setter_factory(self, property_name):
         """
-        Returns a hybrid property setter for given property name.
+        Return a hybrid property setter for given property name.
 
         :param property_name: Name of the property to generate a setter for
         """
@@ -42,7 +42,7 @@ class HybridPropertyBuilder(object):
 
     def generate_hybrid(self, property_name):
         """
-        Generates a SQLAlchemy hybrid property for given translation model
+        Generate a SQLAlchemy hybrid property for given translation model
         property.
 
         :param property_name:
@@ -63,7 +63,7 @@ class HybridPropertyBuilder(object):
 
     def detect_collisions(self, property_name):
         """
-        Detects possible naming collisions for given property name.
+        Detect possible naming collisions for given property name.
 
         :raises sqlalchemy_i18n.exc.ImproperlyConfigured: if the model already
             has a property with given name
@@ -130,7 +130,7 @@ class RelationshipBuilder(object):
 
     def assign_fallback_translation(self):
         """
-        Assigns the current translation relationship for translatable parent
+        Assign the current translation relationship for translatable parent
         class.
         """
         mapper = sa.orm.class_mapper(self.parent_cls)
@@ -153,7 +153,7 @@ class RelationshipBuilder(object):
 
     def assign_current_translation(self):
         """
-        Assigns the current translation relationship for translatable parent
+        Assign the current translation relationship for translatable parent
         class.
         """
         mapper = sa.orm.class_mapper(self.parent_cls)
