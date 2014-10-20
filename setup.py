@@ -5,22 +5,7 @@ SQLAlchemy-i18n
 Internationalization extension for SQLAlchemy models.
 """
 
-from setuptools import setup, Command
-import subprocess
-
-
-class PyTest(Command):
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        errno = subprocess.call(['py.test'])
-        raise SystemExit(errno)
+from setuptools import setup
 
 
 extras_require = {
@@ -54,7 +39,6 @@ setup(
         'six>=1.4.1'
     ],
     extras_require=extras_require,
-    cmdclass={'test': PyTest},
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
