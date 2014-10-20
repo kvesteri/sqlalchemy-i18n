@@ -4,8 +4,22 @@ SQLAlchemy-i18n
 
 Internationalization extension for SQLAlchemy models.
 """
-
+import os
+import re
+import sys
 from setuptools import setup
+
+
+PY3 = sys.version_info[0] == 3
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def get_version():
+    filename = os.path.join(HERE, 'sqlalchemy_i18n', '__init__.py')
+    with open(filename) as f:
+        contents = f.read()
+    pattern = r"^__version__ = '(.*?)'$"
+    return re.search(pattern, contents, re.MULTILINE).group(1)
 
 
 extras_require = {
@@ -22,7 +36,7 @@ extras_require = {
 
 setup(
     name='SQLAlchemy-i18n',
-    version='0.9.0',
+    version=get_version(),
     url='https://github.com/kvesteri/sqlalchemy-i18n',
     license='BSD',
     author='Konsta Vesterinen',
