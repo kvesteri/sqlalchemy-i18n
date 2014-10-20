@@ -5,7 +5,7 @@ from sqlalchemy.ext.compiler import compiles
 
 class current_locale(expression.FunctionElement):
     type = sa.types.Unicode()
-    name = 'tsvector_match'
+    name = 'current_locale'
 
 
 @compiles(current_locale)
