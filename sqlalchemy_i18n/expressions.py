@@ -14,5 +14,5 @@ def compile_current_locale(element, compiler, **kw):
     from sqlalchemy_utils.i18n import get_locale
 
     return '%s' % compiler.process(
-        sa.bindparam('current_locale', get_locale())
+        sa.bindparam('current_locale', str(get_locale()))
     )
