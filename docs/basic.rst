@@ -87,25 +87,3 @@ Attribute access::
     article.translations.en.name = u'Some article'
     article.translations.fi.name = u'Joku artikkeli'
 
-
-
-Locale forcing
---------------
-
-You can force your models to use custom current locale by using force_locale context managers.
-
-
-::
-
-
-    article = Article()
-
-    article.translations['fi'].name = u'Joku artikkeli'
-    article.translations['en'].name = u'Some article'
-
-
-    article.name  # u'Some article'
-
-    with article.force_locale('fi'):
-        article.name  # u'Joku artikkeli'
-
