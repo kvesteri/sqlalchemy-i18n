@@ -4,8 +4,19 @@ QuickStart
 
 In order to make your models use SQLAlchemy-i18n you need two things:
 
-1. Call make_translatable() before your models are defined.
-2. Define translation model and make it inherit mixin provided by translation_base function
+1. Assign get_locale function sqlalchemy_utils.i18n module. The following example shows how to do this using flask.ext.babel::
+
+
+    import sqlalchemy_utils
+    from flask.ext.babel import get_locale
+
+
+    sqlalchemy_utils.i18n.get_locale = get_locale
+
+
+
+2. Call make_translatable() before your models are defined.
+3. Define translation model and make it inherit mixin provided by translation_base function
 
 
 ::
