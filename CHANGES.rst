@@ -4,7 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
-1.0 (2014-xx-xx)
+1.0.1 (2014-10-21)
+^^^^^^^^^^^^^^^^^^
+
+- Made current_locale expression a GenericFunction
+
+
+1.0 (2014-10-21)
 ^^^^^^^^^^^^^^^^
 
 - Made current_translation work with same schematics as class variable and object variable.

@@ -1,11 +1,10 @@
 import sqlalchemy as sa
-from sqlalchemy.sql import expression
+from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.ext.compiler import compiles
 
 
-class current_locale(expression.FunctionElement):
-    type = sa.types.Unicode()
-    name = 'current_locale'
+class current_locale(GenericFunction):
+    type = sa.types.String()
 
 
 @compiles(current_locale)
