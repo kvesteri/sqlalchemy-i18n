@@ -23,13 +23,18 @@ In order to make your models use SQLAlchemy-i18n you need two things:
 
 
     import sqlalchemy as sa
-    from sqlalchemy_i18n import make_translatable, translation_base
+
+    from sqlalchemy_i18n import (
+        make_translatable,
+        translation_base,
+        Translatable,
+    )
 
 
     make_translatable(options={'locales': ['fi', 'en']})
 
 
-    class Article(Base):
+    class Article(Translatable, Base):
         __tablename__ = 'article'
         __translatable__ = {'locales': ['fi', 'en']}
 
