@@ -33,32 +33,29 @@ Consider you have already defined SQLAlchemy connections and declarative base as
     Base = declarative_base()
 
 
-You only need to define two things, first you have to make the desired mapper translatable using make_translatable() function.
-Internally this function attaches two sqlalchemy event listeners for given mapper.
-
-NOTICE: Calling make_translatable() for given mapper should happen only once per application.
-
-::
+You only need to do two things, first you have to pass the supported locales to the
+`make_translatable` function::
 
     from sqlalchemy_i18n import make_translatable
 
-    make_translatable(sa.orm.mapper)
+    make_translatable(options={'locales': ['fi', 'en']})
 
 
-Secondly you need to define translatable models. You can achieve this by making you models extend Translatable mixin and defining __translated_columns__ class property.
+Then you need to split your model content into translatable and non translatable::
 
-
-::
+    from sqlalchemy_i18n import Translatable, translation_base
 
     class Article(Base, Translatable):
-        __translated_columns__ = [
-            sa.Column('name', sa.Unicode(255)),
-            sa.Column('content', sa.UnicodeText)
-        ]
-
+        __tablename__ = 'article'
         id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-
         description = sa.Column(sa.UnicodeText)
+
+
+    class ArticleTranslation(translation_base(Article)):
+        __tablename__ = 'article_translation'
+
+        name = sa.Column(sa.Unicode(255))
+        content = sa.Column(sa.UnicodeText)
 
 
 
