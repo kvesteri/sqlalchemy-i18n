@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sqlalchemy as sa
 from tests import DeclarativeTestCase, ClassicTestCase
 
 
@@ -13,6 +14,24 @@ class Suite(object):
             ' AND article_translation.locale = :current_locale'
             in str(query)
         )
+
+    def test_order_by_translation(self):
+        self.session.add(self.Article(name=u'cbc'))
+        self.session.add(self.Article(name=u'abc'))
+        self.session.add(self.Article(name=u'bbc'))
+        self.session.commit()
+
+        current_translation = sa.orm.aliased(self.Article.current_translation)
+        articles = (
+            self.session.query(self.Article)
+            .join(current_translation, self.Article.current_translation)
+            .options(sa.orm.contains_eager(
+                self.Article.current_translation, alias=current_translation)
+            )
+            .order_by(current_translation.name)
+        ).all()
+        names = [a.name for a in articles]
+        assert names == ['abc', 'bbc', 'cbc']
 
     def test_fallback_locale_as_expression(self):
         query = (

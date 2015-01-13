@@ -85,6 +85,7 @@ class DeclarativeTestCase(object):
             content = sa.Column(sa.UnicodeText)
 
         self.Article = Article
+        self.ArticleTranslation = ArticleTranslation
 
     def create_article(self):
         article = self.Article(name=u'Something', content=u'Something')
