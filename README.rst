@@ -45,20 +45,25 @@ NOTICE: Calling make_translatable() for given mapper should happen only once per
     make_translatable(sa.orm.mapper)
 
 
-Secondly you need to define translatable models. You can achieve this by making you models extend Translatable mixin and defining __translated_columns__ class property.
+Secondly you need to define translatable models. In the following example we add translatable Article model with two translatable properties (name and content).
 
 
 ::
 
+    from sqlalchemy_i18n import Translatable, translation_base
+
+
     class Article(Base, Translatable):
-        __translated_columns__ = [
-            sa.Column('name', sa.Unicode(255)),
-            sa.Column('content', sa.UnicodeText)
-        ]
-
         id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
-
         description = sa.Column(sa.UnicodeText)
+
+
+    class ArticleTranslation(translation_base(Article)):
+        __tablename__ = 'article_translation'
+
+        name = sa.Column(sa.Unicode(255))
+        content = sa.Column(sa.UnicodeText)
+
 
 
 
