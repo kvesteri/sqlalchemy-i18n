@@ -42,7 +42,6 @@ class Translatable(object):
     def fallback_translation(cls):
         return cls._fallback_translation
 
-
     # Translations getters and setters
     @hybrid_property
     def translations(self):

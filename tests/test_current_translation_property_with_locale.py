@@ -37,7 +37,6 @@ class TestDeclarative(Suite, DeclarativeTestCase):
             id = sa.Column(sa.Integer, autoincrement=True, primary_key=True)
             description = sa.Column(sa.UnicodeText)
 
-
         class ArticleTranslation(translation_base(Article)):
             __tablename__ = 'article_translation'
 

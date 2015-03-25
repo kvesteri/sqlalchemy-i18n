@@ -86,4 +86,3 @@ class TestClassic(Suite, ClassicTestCase):
 
         self.Article = Article
         self.ArticleTranslation = ArticleTranslation
-

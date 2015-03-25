@@ -159,13 +159,19 @@ class TestClassic(Suite, ClassicTestCase):
                       polymorphic_identity=u'article')
 
     def test_table_name(self):
-        article_l10n_mapper = sa.orm.class_mapper(self.Article.__translatable__['class'])
+        article_l10n_mapper = sa.orm.class_mapper(
+            self.Article.__translatable__['class']
+        )
         table = article_l10n_mapper.local_table
         assert table.name == 'text_item_translation'
 
     def test_inherits_parent_table(self):
-        article_l10n_mapper = sa.orm.class_mapper(self.Article.__translatable__['class'])
-        textitem_l10n_mapper = sa.orm.class_mapper(self.TextItem.__translatable__['class'])
+        article_l10n_mapper = sa.orm.class_mapper(
+            self.Article.__translatable__['class']
+        )
+        textitem_l10n_mapper = sa.orm.class_mapper(
+            self.TextItem.__translatable__['class']
+        )
         article_l10n_table = article_l10n_mapper.local_table
         textitem_l10n_table = textitem_l10n_mapper.local_table
         assert article_l10n_table == textitem_l10n_table

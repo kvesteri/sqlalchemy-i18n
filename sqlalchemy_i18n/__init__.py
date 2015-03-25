@@ -3,7 +3,6 @@ from .builders import ImproperlyConfigured
 from .manager import translation_manager, TranslationManager, translation_base
 from .translatable import Translatable, UnknownLocaleError
 
-
 __all__ = (
     translation_base,
     ImproperlyConfigured,
@@ -47,7 +46,6 @@ def make_translatable(
     sa.event.listen(
         session, 'before_flush', manager.auto_create_translations
     )
-
 
 
 def find_translations(obj, property_name, locale):
