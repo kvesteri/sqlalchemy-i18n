@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from pytest import raises
 import sqlalchemy as sa
+from pytest import raises
+
 from sqlalchemy_i18n import (
-    Translatable, translation_base, ImproperlyConfigured
+    ImproperlyConfigured,
+    Translatable,
+    translation_base
 )
 from tests import DeclarativeTestCase
 

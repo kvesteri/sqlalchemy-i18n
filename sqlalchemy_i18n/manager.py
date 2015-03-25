@@ -1,4 +1,5 @@
 from copy import copy
+
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
 from sqlalchemy_utils.functions import get_declarative_base, get_primary_keys

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sqlalchemy as sa
-from tests import DeclarativeTestCase, ClassicTestCase
+
+from tests import ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

@@ -1,6 +1,7 @@
 import sqlalchemy as sa
+
 from .builders import ImproperlyConfigured
-from .manager import translation_manager, TranslationManager, translation_base
+from .manager import translation_base, translation_manager, TranslationManager
 from .translatable import Translatable, UnknownLocaleError
 
 __all__ = (

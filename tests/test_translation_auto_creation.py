@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy_i18n import translation_manager
-from tests import DeclarativeTestCase, ClassicTestCase
+from tests import ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

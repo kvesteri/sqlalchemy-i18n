@@ -2,9 +2,10 @@
 
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
+
 from sqlalchemy_i18n import Translatable, translation_base
 from sqlalchemy_i18n.manager import BaseTranslationMixin
-from tests import DeclarativeTestCase, ClassicTestCase, ClassicBase
+from tests import ClassicBase, ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

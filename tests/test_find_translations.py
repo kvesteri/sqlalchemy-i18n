@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from decimal import Decimal
+
 from sqlalchemy_i18n import find_translations
-from tests import DeclarativeTestCase, ClassicTestCase
+from tests import ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

@@ -1,8 +1,9 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.util import has_identity
+
 from .exc import UnknownLocaleError
-from .utils import get_fallback_locale, get_current_locale
+from .utils import get_current_locale, get_fallback_locale
 
 
 class Translatable(object):

@@ -3,16 +3,20 @@
 import warnings
 
 import sqlalchemy as sa
+import sqlalchemy_utils
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
+
 from sqlalchemy_i18n import (
-    Translatable, translation_manager, make_translatable, translation_base
+    make_translatable,
+    Translatable,
+    translation_base,
+    translation_manager
 )
 from sqlalchemy_i18n.manager import BaseTranslationMixin
-import sqlalchemy_utils
 
 
 @sa.event.listens_for(Engine, 'before_cursor_execute')

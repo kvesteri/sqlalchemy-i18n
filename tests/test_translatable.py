@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tests import DeclarativeTestCase, ClassicTestCase
+from tests import ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

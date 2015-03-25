@@ -1,4 +1,5 @@
 from sqlalchemy.orm.relationships import RelationshipProperty
+
 from .exc import UnknownLocaleError
 
 

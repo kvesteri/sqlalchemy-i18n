@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import sqlalchemy as sa
+
 from sqlalchemy_i18n import Translatable, translation_base
 from sqlalchemy_i18n.manager import BaseTranslationMixin
 from tests import ClassicBase
-from tests.test_fallback_locale_as_callable import (
-    TestDeclarative as TDBase, TestClassic as TCBase)
+from tests.test_fallback_locale_as_callable import TestClassic as TCBase
+from tests.test_fallback_locale_as_callable import TestDeclarative as TDBase
 
 
 class TestDeclarative(TDBase):

@@ -31,6 +31,7 @@ extras_require = {
         'flexmock>=0.9.7',
         'psycopg2>=2.4.6',
         'flake8>=2.4.0',
+        'isort>=3.9.6'
     ]
 }
 

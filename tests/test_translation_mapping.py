@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from pytest import raises
+
 from sqlalchemy_i18n import UnknownLocaleError
-from tests import DeclarativeTestCase, ClassicTestCase
+from tests import ClassicTestCase, DeclarativeTestCase
 
 
 class Suite(object):

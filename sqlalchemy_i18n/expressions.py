@@ -1,6 +1,6 @@
 import sqlalchemy as sa
-from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.functions import GenericFunction
 
 
 class current_locale(GenericFunction):

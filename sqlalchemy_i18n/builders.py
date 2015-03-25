@@ -4,9 +4,9 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy_utils.functions import get_primary_keys
 
 from .comparators import TranslationComparator
-from .expressions import current_locale
 from .exc import ImproperlyConfigured
-from .utils import option, get_fallback_locale
+from .expressions import current_locale
+from .utils import get_fallback_locale, option
 
 
 class HybridPropertyBuilder(object):
