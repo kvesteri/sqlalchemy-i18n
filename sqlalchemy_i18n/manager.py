@@ -67,7 +67,8 @@ class TranslationManager(object):
             'locales': [],
             'auto_create_locales': True,
             'fallback_locale': 'en',
-            'exclude_hybrid_properties': []
+            'exclude_hybrid_properties': [],
+            'passive_deletes': True
         }
 
     def instrument_translation_classes(self, mapper, cls):
