@@ -23,7 +23,7 @@ Consider you have already defined SQLAlchemy connections and declarative base as
 
 ::
 
-    import sqlalchemy as sa
+
     from sqlalchemy import create_engine
     from sqlalchemy.ext.declarative import declarative_base
 
@@ -50,6 +50,7 @@ Secondly you need to define translatable models. In the following example we add
 
 ::
 
+    import sqlalchemy as sa
     from sqlalchemy_i18n import Translatable, translation_base
 
 
@@ -76,7 +77,7 @@ Resources
 
 .. |Build Status| image:: https://travis-ci.org/kvesteri/sqlalchemy-i18n.png?branch=master
    :target: https://travis-ci.org/kvesteri/sqlalchemy-i18n
-.. |Version Status| image:: https://pypip.in/v/SQLAlchemy-i18n/badge.png
-   :target: https://crate.io/packages/SQLAlchemy-i18n/
-.. |Downloads| image:: https://pypip.in/d/SQLAlchemy-i18n/badge.png
-   :target: https://crate.io/packages/SQLAlchemy-i18n/
+.. |Version Status| image:: https://img.shields.io/pypi/v/SQLAlchemy-i18n.svg
+   :target: https://pypi.python.org/pypi/SQLAlchemy-i18n/
+.. |Downloads| image:: https://img.shields.io/pypi/dm/SQLAlchemy-i18n.svg
+   :target: https://pypi.python.org/pypi/SQLAlchemy-i18n/
