@@ -11,5 +11,6 @@ python:
 install:
   - pip install -e ".[test]"
 script:
+  - isort --verbose --recursive --diff sqlalchemy_i18n tests && isort --verbose --recursive --check-only sqlalchemy_i18n tests
   - flake8 sqlalchemy_i18n tests
   - python setup.py test
