@@ -21,7 +21,7 @@ Basic Usage
 Consider you have already defined SQLAlchemy connections and declarative base as follows:
 
 
-::
+.. code-block:: python
 
 
     from sqlalchemy import create_engine
@@ -38,7 +38,8 @@ Internally this function attaches two sqlalchemy event listeners for given mappe
 
 NOTICE: Calling make_translatable() for given mapper should happen only once per application.
 
-::
+.. code-block:: python
+
 
     from sqlalchemy_i18n import make_translatable
 
@@ -48,7 +49,8 @@ NOTICE: Calling make_translatable() for given mapper should happen only once per
 Secondly you need to define translatable models. In the following example we add translatable Article model with two translatable properties (name and content).
 
 
-::
+.. code-block:: python
+
 
     import sqlalchemy as sa
     from sqlalchemy_i18n import Translatable, translation_base
