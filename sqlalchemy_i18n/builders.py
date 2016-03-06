@@ -1,3 +1,5 @@
+from copy import copy
+
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -95,7 +97,8 @@ class HybridPropertyBuilder(object):
 
 
 class RelationshipBuilder(object):
-    def __init__(self, translation_cls):
+    def __init__(self, manager, translation_cls):
+        self.manager = manager
         self.translation_cls = translation_cls
         self.parent_cls = self.translation_cls.__parent_class__
 
@@ -180,20 +183,34 @@ class RelationshipBuilder(object):
         """
         mapper = sa.orm.class_mapper(self.parent_cls)
         if not mapper.has_property('_translations'):
-            foreign_keys = [
-                getattr(self.translation_cls, column_key)
-                for column_key in get_primary_keys(self.parent_cls).keys()
-            ]
-
             mapper.add_property('_translations', sa.orm.relationship(
                 self.translation_cls,
-                primaryjoin=sa.and_(*self.primary_key_conditions),
-                foreign_keys=foreign_keys,
-                collection_class=attribute_mapped_collection('locale'),
-                comparator_factory=TranslationComparator,
-                cascade='all, delete-orphan',
-                passive_deletes=True,
+                **self.get_translations_relationship_args()
             ))
+
+    def get_translations_relationship_args(self):
+        foreign_keys = [
+            getattr(self.translation_cls, column_key)
+            for column_key in get_primary_keys(self.parent_cls).keys()
+        ]
+
+        relationship_args = copy(
+            self.manager.option(
+                self.parent_cls,
+                'translations_relationship_args'
+            )
+        )
+        defaults = dict(
+            primaryjoin=sa.and_(*self.primary_key_conditions),
+            foreign_keys=foreign_keys,
+            collection_class=attribute_mapped_collection('locale'),
+            comparator_factory=TranslationComparator,
+            cascade='all, delete-orphan',
+            passive_deletes=True,
+        )
+        for key, value in defaults.items():
+            relationship_args.setdefault(key, value)
+        return relationship_args
 
     def assign_translation_parent(self):
         mapper = sa.orm.class_mapper(self.translation_cls)

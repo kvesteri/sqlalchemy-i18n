@@ -12,9 +12,17 @@ class BaseTranslationMixin(object):
     pass
 
 
-def translation_base(parent_cls, base_class_factory=None):
+def translation_base(
+    parent_cls,
+    base_class_factory=None,
+    foreign_key_args=None
+):
     if base_class_factory is None:
         base_class_factory = get_declarative_base
+
+    if foreign_key_args is None:
+        foreign_key_args = {}
+        foreign_key_args.setdefault('ondelete', 'CASCADE')
 
     class TranslationMixin(
         base_class_factory(parent_cls),
@@ -37,7 +45,7 @@ def translation_base(parent_cls, base_class_factory=None):
                             '%s.%s' % (parent_cls.__tablename__, name)
                             for name in names
                         ],
-                        ondelete='CASCADE'
+                        **foreign_key_args
                     ),
                 )
 
@@ -64,7 +72,8 @@ class TranslationManager(object):
             'locales': [],
             'auto_create_locales': True,
             'fallback_locale': 'en',
-            'exclude_hybrid_properties': []
+            'exclude_hybrid_properties': [],
+            'translations_relationship_args': {}
         }
 
     def instrument_translation_classes(self, mapper, cls):
@@ -96,7 +105,7 @@ class TranslationManager(object):
             parent_cls.__translatable__['class'] = cls
 
             HybridPropertyBuilder(self, cls)()
-            RelationshipBuilder(cls)()
+            RelationshipBuilder(self, cls)()
 
         self.pending_classes = []
 

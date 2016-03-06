@@ -4,6 +4,13 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+1.0.2 (2016-03-06)
+^^^^^^^^^^^^^^^^^^
+
+- Added ``translations_relationship_args`` configuration option
+- Added ``foreign_key_args`` parameter to ``translations_base`` function
+
+
 1.0.1 (2014-10-21)
 ^^^^^^^^^^^^^^^^^^
 

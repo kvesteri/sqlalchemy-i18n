@@ -75,3 +75,31 @@ Other options
 * fallback_locale
 
     The locale which will be used as a fallback for translation hybrid properties that return None or empty string.
+
+* translations_relationship_args
+
+    Dictionary of arguments passed as defaults for automatically created translations relationship.::
+
+
+    class Article(Base):
+        __tablename__ = 'article'
+        __translatable__ = {
+            'locales': [u'en', u'fi'],
+            'translations_relationship_args': {
+                'passive_deletes': False
+            }
+        }
+
+        id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+
+        author = sa.Column(sa.Unicode(255))
+
+        def get_locale(self):
+            return 'en'
+
+
+    class ArticleTranslation(translation_base(Article)):
+        __tablename__ = 'article_translation'
+
+        name = sa.Column(sa.Unicode(255))
+        content = sa.Column(sa.UnicodeText)
