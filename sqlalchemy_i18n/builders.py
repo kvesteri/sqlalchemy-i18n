@@ -192,7 +192,7 @@ class RelationshipBuilder(object):
                 collection_class=attribute_mapped_collection('locale'),
                 comparator_factory=TranslationComparator,
                 cascade='all, delete-orphan',
-                passive_deletes=True,
+                passive_deletes=option(self.parent_cls, 'passive_deletes'),
             ))
 
     def assign_translation_parent(self):

@@ -12,7 +12,7 @@ class BaseTranslationMixin(object):
     pass
 
 
-def translation_base(parent_cls, base_class_factory=None):
+def translation_base(parent_cls, base_class_factory=None, ondelete='CASCADE'):
     if base_class_factory is None:
         base_class_factory = get_declarative_base
 
@@ -37,7 +37,7 @@ def translation_base(parent_cls, base_class_factory=None):
                             '%s.%s' % (parent_cls.__tablename__, name)
                             for name in names
                         ],
-                        ondelete='CASCADE'
+                        ondelete=ondelete
                     ),
                 )
 
@@ -64,7 +64,8 @@ class TranslationManager(object):
             'locales': [],
             'auto_create_locales': True,
             'fallback_locale': 'en',
-            'exclude_hybrid_properties': []
+            'exclude_hybrid_properties': [],
+            'passive_deletes': True
         }
 
     def instrument_translation_classes(self, mapper, cls):
