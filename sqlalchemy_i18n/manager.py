@@ -8,9 +8,6 @@ from .builders import HybridPropertyBuilder, RelationshipBuilder
 from .utils import all_translated_columns, is_string
 
 
-class_map = {}
-
-
 class BaseTranslationMixin(object):
     pass
 
