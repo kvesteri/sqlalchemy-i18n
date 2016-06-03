@@ -73,7 +73,7 @@ Secondly you need to define translatable models. In the following example we add
 Resources
 ---------
 
-- `Documentation <http://sqlalchemy-i18n.readthedocs.org/>`_
+- `Documentation <https://sqlalchemy-i18n.readthedocs.io/>`_
 - `Issue Tracker <http://github.com/kvesteri/sqlalchemy-i18n/issues>`_
 - `Code <http://github.com/kvesteri/sqlalchemy-i18n/>`_
 
