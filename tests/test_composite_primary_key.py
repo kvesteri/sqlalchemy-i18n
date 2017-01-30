@@ -44,30 +44,49 @@ class TestDeclarative(Suite, DeclarativeTestCase):
 class TestClassic(Suite, ClassicTestCase):
     def create_tables(self):
         self.article = sa.Table(
-            'article', self.metadata,
-            sa.Column('id1', sa.Integer,
-                      autoincrement=True,
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('id2', sa.Integer,
-                      autoincrement=True,
-                      primary_key=True,
-                      nullable=False))
+            'article',
+            self.metadata,
+            sa.Column(
+                'id1',
+                sa.Integer,
+                primary_key=True,
+                nullable=False
+            ),
+            sa.Column(
+                'id2',
+                sa.Integer,
+                primary_key=True,
+                nullable=False
+            )
+        )
         self.article_translation = sa.Table(
-            'article_translation', self.metadata,
-            sa.Column('id1', sa.Integer,
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('id2', sa.Integer,
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('locale', sa.types.CHAR(2),
-                      primary_key=True,
-                      nullable=False),
+            'article_translation',
+            self.metadata,
+            sa.Column(
+                'id1',
+                sa.Integer,
+                primary_key=True,
+                nullable=False
+            ),
+            sa.Column(
+                'id2',
+                sa.Integer,
+                primary_key=True,
+                nullable=False
+            ),
+            sa.Column(
+                'locale',
+                sa.types.CHAR(2),
+                primary_key=True,
+                nullable=False
+            ),
             sa.Column('name', sa.Unicode(255)),
             sa.Column('content', sa.UnicodeText),
-            sa.ForeignKeyConstraint(['id1', 'id2'],
-                                    ['article.id1', 'article.id2']))
+            sa.ForeignKeyConstraint(
+                ['id1', 'id2'],
+                ['article.id1', 'article.id2']
+            )
+        )
 
     def create_models(self):
         class Article(ClassicBase, Translatable):

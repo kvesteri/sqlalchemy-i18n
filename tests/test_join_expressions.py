@@ -12,7 +12,7 @@ class Suite(object):
         )
         assert (
             'JOIN article_translation ON article.id = article_translation.id'
-            ' AND article_translation.locale = :current_locale'
+            ' AND article_translation.locale = '
             in str(query)
         )
 
@@ -41,7 +41,7 @@ class Suite(object):
         )
         assert (
             'JOIN article_translation ON article.id = article_translation.id'
-            ' AND article_translation.locale = :locale_1'
+            ' AND article_translation.locale = '
             in str(query)
         )
 
