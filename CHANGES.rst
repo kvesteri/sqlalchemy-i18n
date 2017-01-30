@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+1.0.3 (2017-01-30)
+^^^^^^^^^^^^^^^^^^
+
+- Set autoincrement as False for translation class inherited primary keys
+
+
 1.0.2 (2016-03-06)
 ^^^^^^^^^^^^^^^^^^
 
