@@ -156,22 +156,37 @@ class ClassicTestCase(DeclarativeTestCase):
     def create_tables(self):
         self.article = sa.Table(
             'article', self.metadata,
-            sa.Column('id', sa.Integer,
-                      autoincrement=True,
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('description', sa.UnicodeText))
+            sa.Column(
+                'id',
+                sa.Integer,
+                autoincrement=True,
+                primary_key=True,
+                nullable=False
+            ),
+            sa.Column('description', sa.UnicodeText)
+        )
         self.article_translation = sa.Table(
-            'article_translation', self.metadata,
-            sa.Column('id', sa.Integer, sa.ForeignKey('article',
-                                                      ondelete="CASCADE"),
-                      primary_key=True,
-                      nullable=False),
-            sa.Column('locale', sa.types.CHAR(2),
-                      primary_key=True,
-                      nullable=False),
+            'article_translation',
+            self.metadata,
+            sa.Column(
+                'id',
+                sa.Integer,
+                sa.ForeignKey(
+                    'article',
+                    ondelete="CASCADE"
+                ),
+                primary_key=True,
+                nullable=False
+            ),
+            sa.Column(
+                'locale',
+                sa.types.CHAR(2),
+                primary_key=True,
+                nullable=False
+            ),
             sa.Column('name', sa.Unicode(255)),
-            sa.Column('content', sa.UnicodeText))
+            sa.Column('content', sa.UnicodeText)
+        )
 
     def create_models(self):
         class Article(ClassicBase, Translatable):
