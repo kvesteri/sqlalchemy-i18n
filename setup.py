@@ -51,7 +51,7 @@ setup(
     platforms='any',
     install_requires=[
         'SQLAlchemy>=0.9',
-        'SQLAlchemy-Utils>=0.25.3',
+        'SQLAlchemy-Utils>=0.25.3,<0.33.10',
         'six>=1.4.1'
     ],
     extras_require=extras_require,
