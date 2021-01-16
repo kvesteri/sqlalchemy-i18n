@@ -21,6 +21,8 @@ from sqlalchemy_i18n.manager import BaseTranslationMixin
 
 @sa.event.listens_for(Engine, 'before_cursor_execute')
 def count_sql_calls(conn, cursor, statement, parameters, context, executemany):
+    if not hasattr(conn, 'query_count'):
+        conn.query_count = 0
     conn.query_count += 1
 
 
@@ -34,7 +36,7 @@ sqlalchemy_utils.i18n.get_locale = lambda: 'en'
 
 
 class DeclarativeTestCase(object):
-    engine_uri = 'postgres://postgres@localhost/sqlalchemy_i18n_test'
+    engine_uri = 'postgresql://postgres@localhost/sqlalchemy_i18n_test'
     locales = ['en', 'fi']
     create_tables = True
     configure_mappers = True
@@ -44,6 +46,9 @@ class DeclarativeTestCase(object):
         self.session = Session()
 
     def setup_method(self, method):
+        if not sqlalchemy_utils.database_exists(self.engine_uri):
+            sqlalchemy_utils.create_database(self.engine_uri)
+
         self.engine = create_engine(self.engine_uri)
         # self.engine.echo = True
         self.connection = self.engine.connect()
