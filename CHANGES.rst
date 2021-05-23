@@ -8,7 +8,7 @@ Here you can see the full list of changes between each SQLAlchemy-i18n release.
 ^^^^^^^^^^^^^^^^^^
 
 - Added SA 1.4 support
-- Drop py27, py33, py34 support
+- Drop py27, py33, py34, py35 support
 
 
 1.0.3 (2017-01-30)
