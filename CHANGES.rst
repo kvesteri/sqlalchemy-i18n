@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each SQLAlchemy-i18n release.
 
 
+1.1.0 (2021-05-23)
+^^^^^^^^^^^^^^^^^^
+
+- Added SA 1.4 support
+
+
 1.0.3 (2017-01-30)
 ^^^^^^^^^^^^^^^^^^
 

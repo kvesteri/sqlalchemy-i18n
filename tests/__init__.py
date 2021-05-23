@@ -9,6 +9,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import close_all_sessions
 
 from sqlalchemy_i18n import (
     make_translatable,
@@ -34,7 +35,7 @@ sqlalchemy_utils.i18n.get_locale = lambda: 'en'
 
 
 class DeclarativeTestCase(object):
-    engine_uri = 'postgres://postgres@localhost/sqlalchemy_i18n_test'
+    engine_uri = 'postgresql://postgres@localhost/sqlalchemy_i18n_test'
     locales = ['en', 'fi']
     create_tables = True
     configure_mappers = True
@@ -60,7 +61,7 @@ class DeclarativeTestCase(object):
 
     def teardown_method(self, method):
         translation_manager.pending_classes = []
-        self.session.close_all()
+        close_all_sessions()
         self.Model.metadata.drop_all(self.connection)
         self.connection.close()
         self.engine.dispose()
@@ -148,7 +149,7 @@ class ClassicTestCase(DeclarativeTestCase):
 
     def teardown_method(self, method):
         translation_manager.pending_classes = []
-        self.session.close_all()
+        close_all_sessions()
         self.metadata.drop_all(self.connection)
         self.connection.close()
         self.engine.dispose()

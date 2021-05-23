@@ -51,7 +51,7 @@ def translation_base(
 
     for column in parent_cls.__table__.c:
         if column.primary_key:
-            column_copy = column.copy()
+            column_copy = column._copy()
             column_copy.autoincrement = False
             setattr(
                 TranslationMixin,
