@@ -22,7 +22,9 @@ class Suite(object):
         self.session.add(self.Article(name=u'bbc'))
         self.session.commit()
 
-        current_translation = sa.orm.aliased(self.Article.current_translation.prop.mapper)
+        current_translation = sa.orm.aliased(
+            self.Article.current_translation.prop.mapper
+        )
         articles = (
             self.session.query(self.Article)
             .join(current_translation, self.Article.current_translation)
