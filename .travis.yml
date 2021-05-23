@@ -1,3 +1,11 @@
+sudo: required
+dist: xenial
+
+before_install:
+  - sudo apt-get update
+  - sudo /etc/init.d/postgresql stop
+  - sudo /etc/init.d/postgresql start 13
+
 before_script:
   - psql -c 'create database sqlalchemy_i18n_test;' -U postgres
 
