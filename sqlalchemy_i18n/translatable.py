@@ -86,9 +86,10 @@ class TranslationsMapping(object):
         ):
             return self.obj._translations.get(locale)
 
-        return session.query(self.obj.__translatable__['class']).get(
-            sa.inspect(self.obj).identity + (locale, )
-        )
+        with session.no_autoflush:
+            return session.query(self.obj.__translatable__['class']).get(
+                sa.inspect(self.obj).identity + (locale, )
+            )
 
     def __getitem__(self, locale):
         if locale in self:
@@ -101,7 +102,12 @@ class TranslationsMapping(object):
                 translation_parent=self.obj,
                 locale=locale
             )
-            self.obj._translations[locale] = locale_obj
+            session = sa.orm.object_session(self.obj)
+            if session is None:
+                self.obj._translations[locale] = locale_obj
+            else:
+                with session.no_autoflush:
+                    self.obj._translations[locale] = locale_obj
             return locale_obj
         raise UnknownLocaleError(locale, self.obj)
 
