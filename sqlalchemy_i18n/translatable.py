@@ -191,7 +191,8 @@ class RuneTranslatable(Translatable):
             self._translations_mapping = createMapping(self)
         return self._translations_mapping
 
-    # alias for translations
+    # TODO: This should create an object that checks the translation for an attribute then 
+    # if None checks the primary/fallback
     @hybrid_property
     def t(self):
         return self.translations

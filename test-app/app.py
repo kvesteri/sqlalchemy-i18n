@@ -32,6 +32,7 @@ def article():
             "items": [
                 {
                     "id": a.id,
+                    # TODO: cleanup of this syntax reliant on `t` attribute
                     "name": a.current_translation.name or a.fallback_translation.name,
                 }
                 for a in items
