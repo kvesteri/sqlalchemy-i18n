@@ -92,8 +92,9 @@ class HybridPropertyBuilder(object):
             if column.key in exclude or column.primary_key:
                 continue
 
-            self.detect_collisions(column.key)
-            self.generate_hybrid(column.key)
+            if not self.manager.option(self, 'fallback_to_parent'):
+                self.detect_collisions(column.key)
+                self.generate_hybrid(column.key)
 
 
 class RelationshipBuilder(object):

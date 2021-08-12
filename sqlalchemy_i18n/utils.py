@@ -38,3 +38,7 @@ def is_string(type_):
         isinstance(type_, sa.String) or
         (isclass(type_) and issubclass(type_, sa.String))
     )
+
+
+def get_pk_column(cls):
+    return cls.__table__.primary_key.columns[0].name

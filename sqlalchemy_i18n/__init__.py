@@ -2,7 +2,8 @@ import sqlalchemy as sa
 
 from .builders import ImproperlyConfigured
 from .manager import translation_base, translation_manager, TranslationManager
-from .translatable import Translatable, UnknownLocaleError
+from .translatable import Translatable, UnknownLocaleError, RuneTranslatable
+from .i18n_id_column import I18IdColumn
 
 __all__ = (
     translation_base,
@@ -10,7 +11,9 @@ __all__ = (
     Translatable,
     TranslationManager,
     translation_manager,
-    UnknownLocaleError
+    UnknownLocaleError,
+    I18IdColumn,
+    RuneTranslatable
 )
 
 

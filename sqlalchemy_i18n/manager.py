@@ -1,11 +1,12 @@
 from copy import copy
+from sqlalchemy_i18n.i18n_id_column import I18IdColumn
 
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr, has_inherited_table
 from sqlalchemy_utils.functions import get_declarative_base, get_primary_keys
 
 from .builders import HybridPropertyBuilder, RelationshipBuilder
-from .utils import all_translated_columns, is_string
+from .utils import all_translated_columns, is_string, get_pk_column
 
 
 class BaseTranslationMixin(object):
@@ -15,7 +16,8 @@ class BaseTranslationMixin(object):
 def translation_base(
     parent_cls,
     base_class_factory=None,
-    foreign_key_args=None
+    foreign_key_args=None,
+    create_columns=True
 ):
     if base_class_factory is None:
         base_class_factory = get_declarative_base
@@ -36,6 +38,9 @@ def translation_base(
             if has_inherited_table(cls):
                 return tuple()
             else:
+                if any(isinstance(getattr(cls, c), I18IdColumn) for c in dir(cls) if '__' not in c):
+                    return create_i18n_fk_constraint(cls, parent_cls, foreign_key_args)
+    
                 names = list(get_primary_keys(parent_cls).keys())
 
                 return (
@@ -49,15 +54,16 @@ def translation_base(
                     ),
                 )
 
-    for column in parent_cls.__table__.c:
-        if column.primary_key:
-            column_copy = column._copy()
-            column_copy.autoincrement = False
-            setattr(
-                TranslationMixin,
-                column.key,
-                column_copy
-            )
+    if create_columns:
+        for column in parent_cls.__table__.c:
+            if column.primary_key:
+                column_copy = column._copy()
+                column_copy.autoincrement = False
+                setattr(
+                    TranslationMixin,
+                    column.key,
+                    column_copy
+                )
 
     TranslationMixin.locale = sa.Column(
         sa.String(10), primary_key=True
@@ -75,7 +81,8 @@ class TranslationManager(object):
             'auto_create_locales': True,
             'fallback_locale': 'en',
             'exclude_hybrid_properties': [],
-            'translations_relationship_args': {}
+            'translations_relationship_args': {},
+            'fallback_to_parent': False,
         }
 
     def instrument_translation_classes(self, mapper, cls):
@@ -160,5 +167,17 @@ class TranslationManager(object):
                 if hasattr(obj, '__translatable__'):
                     self.create_missing_locales(obj)
 
+def create_i18n_fk_constraint(cls, parent_cls, foreign_key_args):
+    cols = [getattr(cls, c) for c in dir(cls) if '__' not in c and isinstance(getattr(cls, c), I18IdColumn)]
+    return (
+        sa.schema.ForeignKeyConstraint(
+            [col.key for col in cols] ,
+            [
+                '%s.%s' % (parent_cls.__tablename__, col.rn_parent_col)
+                for col in cols
+            ],
+            **foreign_key_args
+        ),
+    )
 
 translation_manager = TranslationManager()

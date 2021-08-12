@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.util import has_identity
+from sqlalchemy_i18n.i18n_id_column import I18IdColumn
 
 from .exc import UnknownLocaleError
 from .utils import get_current_locale, get_fallback_locale
@@ -47,7 +48,7 @@ class Translatable(object):
     @hybrid_property
     def translations(self):
         if not hasattr(self, '_translations_mapping'):
-            self._translations_mapping = TranslationsMapping(self)
+            self._translations_mapping = createMapping(self)
         return self._translations_mapping
 
     @translations.setter
@@ -101,7 +102,8 @@ class TranslationsMapping(object):
                 translation_parent=self.obj,
                 locale=locale
             )
-            self.obj._translations[locale] = locale_obj
+            if self.manager.option(self.obj, 'auto_create_locales'):
+                self.obj._translations[locale] = locale_obj
             return locale_obj
         raise UnknownLocaleError(locale, self.obj)
 
@@ -145,3 +147,57 @@ class TranslationsMapping(object):
     def __iter__(self):
         for locale in self.manager.option(self.obj, 'locales'):
             yield locale, self[locale]
+
+class RuneTranslationsMapping(TranslationsMapping):
+
+    def fetch(self, locale):
+        session = sa.orm.object_session(self.obj)
+        # If the object has no identity and its not in session or if the object
+        # has _translations relationship loaded get the locale object from the
+        # relationship.
+        if '_translations' not in sa.inspect(self.obj).unloaded or (
+            not session or not has_identity(self.obj)
+        ):
+            return self.obj._translations.get(locale)
+
+        translated_cols = self.obj.__translatable__['class'].__table__.c
+        translated = [c for c in translated_cols if isinstance(c, I18IdColumn)]
+        filters = [t == getattr(self.obj, t.rn_parent_col) for t in translated]
+
+        return session.query(self.obj.__translatable__['class']).filter(
+            *filters,
+            translated_cols.locale == locale
+        ).first()
+
+    def __getitem__(self, locale):
+        if locale == get_fallback_locale(self.obj):
+            return self.obj
+        return super().__getitem__(locale)
+
+    # I think this is wrong..
+    def __setitem__(self, locale, translation_obj):
+        if locale == get_fallback_locale(self):
+            for key in translation_obj:
+                self.obj[key] = translation_obj[key]
+        return super().__setitem__(locale, translation_obj)
+
+
+class RuneTranslatable(Translatable):
+
+    # Translations getters and setters
+    @hybrid_property
+    def translations(self):
+        if not hasattr(self, '_translations_mapping'):
+            self._translations_mapping = createMapping(self)
+        return self._translations_mapping
+
+    # alias for translations
+    @hybrid_property
+    def t(self):
+        return self.translations
+
+def createMapping(translatable):
+    manager = translatable.__translatable__['manager']
+    if manager.option(translatable, 'fallback_to_parent'):
+        return RuneTranslationsMapping(translatable)
+    return TranslationsMapping(translatable)
