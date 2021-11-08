@@ -68,7 +68,7 @@ Other options
 
     Whether or not to auto-create all locales whenever some of the locales is created. By default this option is True. It is highly recommended to leave this as True, since not creating all locales at once can lead to problems in multithreading environments.
 
-    Consider for example the following situtation. User creates a translatable Article which has two translatable fields (name and content). At the first request this article is created along with one translation table entry with locale 'en'.
+    Consider for example the following situation. User creates a translatable Article which has two translatable fields (name and content). At the first request this article is created along with one translation table entry with locale 'en'.
 
     After this two users edit the finnish translation of this article at the same time. The application tries to create finnish translation twice resulting in database integrity errors.
 
