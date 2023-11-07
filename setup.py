@@ -52,7 +52,6 @@ setup(
     install_requires=[
         'SQLAlchemy>=1.3',
         'SQLAlchemy-Utils>=0.37.3',
-        'six>=1.4.1'
     ],
     python_requires='>=3.6',
     extras_require=extras_require,
